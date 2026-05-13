@@ -1,9 +1,10 @@
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// 조사 결과를 화면에 출력하는 전용 UI 컴포넌트.
-/// 뷰 로직만 담당하여 다른 시스템과 결합도를 낮춥니다.
+/// UI component that displays investigation results.
+/// The panel can start inactive in the scene; Show activates it and Hide clears then deactivates it.
 /// </summary>
 public sealed class InvestigationUI : MonoBehaviour
 {
@@ -11,37 +12,105 @@ public sealed class InvestigationUI : MonoBehaviour
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text bodyText;
 
+    private readonly List<DialogueLine> _lines = new();
+    private int _currentLineIndex;
+
+    public bool IsVisible => panelRoot != null && panelRoot.activeSelf;
+    public bool HasNextLine => IsVisible && _currentLineIndex + 1 < _lines.Count;
+
     private void Awake()
     {
-        if (panelRoot != null)
+        if (panelRoot == null)
         {
-            panelRoot.SetActive(false);
+            panelRoot = gameObject;
         }
+
+        ClearTexts();
     }
 
     public void Show(string title, string body)
     {
-        if (titleText != null)
+        ShowSequence(new[] { new DialogueLine(title, body) });
+    }
+
+    public void ShowSequence(IEnumerable<DialogueLine> lines)
+    {
+        if (panelRoot == null)
         {
-            titleText.text = title;
+            panelRoot = gameObject;
         }
 
-        if (bodyText != null)
+        _lines.Clear();
+        if (lines != null)
         {
-            bodyText.text = body;
+            foreach (DialogueLine line in lines)
+            {
+                if (!string.IsNullOrWhiteSpace(line.Text))
+                {
+                    _lines.Add(line);
+                }
+            }
         }
 
-        if (panelRoot != null && !panelRoot.activeSelf)
+        if (_lines.Count == 0)
         {
-            panelRoot.SetActive(true);
+            Hide();
+            return;
         }
+
+        _currentLineIndex = 0;
+        panelRoot.SetActive(true);
+        RenderCurrentLine();
+    }
+
+    public void ShowNextLine()
+    {
+        if (!HasNextLine)
+        {
+            return;
+        }
+
+        _currentLineIndex++;
+        RenderCurrentLine();
     }
 
     public void Hide()
     {
+        _lines.Clear();
+        _currentLineIndex = 0;
+        ClearTexts();
+
         if (panelRoot != null)
         {
             panelRoot.SetActive(false);
+        }
+    }
+
+    private void RenderCurrentLine()
+    {
+        DialogueLine line = _lines[_currentLineIndex];
+
+        if (titleText != null)
+        {
+            titleText.text = line.Speaker;
+        }
+
+        if (bodyText != null)
+        {
+            bodyText.text = line.Text;
+        }
+    }
+
+    private void ClearTexts()
+    {
+        if (titleText != null)
+        {
+            titleText.text = string.Empty;
+        }
+
+        if (bodyText != null)
+        {
+            bodyText.text = string.Empty;
         }
     }
 }

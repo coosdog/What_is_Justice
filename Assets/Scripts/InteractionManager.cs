@@ -1,34 +1,71 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
-/// <summary>
-/// 조사 상태 및 조사 결과 이벤트를 관리하는 핵심 매니저.
-/// 싱글톤 없이 씬 참조로 동작하며, 세이브 시스템과 연결 가능한 형태로 설계했습니다.
-/// </summary>
 public sealed class InteractionManager : MonoBehaviour
 {
     [SerializeField] private InvestigationUI investigationUI;
+    [SerializeField] private CsvDialogueDatabase dialogueDatabase;
+    [SerializeField] private EvidenceInventory evidenceInventory;
+    [SerializeField] private BackgroundTransitionManager backgroundTransitionManager;
     [SerializeField] private InteractableObject[] interactables;
 
-    /// <summary>
-    /// 조사 완료 시 외부 시스템(대화/인벤토리/노트)에서 구독 가능한 이벤트.
-    /// bool: 이번 조사에서 최초 조사인지 여부
-    /// bool: 단서 획득 여부
-    /// </summary>
     public event Action<ClueData, bool, bool> InvestigationCompleted;
 
     private readonly HashSet<string> _investigatedClueIds = new();
+    private ClueData _activeClueData;
+    private bool _activeWasFirstInvestigation;
+    private int _lastShownFrame = -1;
 
     private void Awake()
     {
-        // 수동 할당이 없으면 자동 수집 (씬 초기화 1회만 수행)
+        if (dialogueDatabase == null)
+        {
+            dialogueDatabase = FindFirstObjectByType<CsvDialogueDatabase>();
+        }
+
+        if (evidenceInventory == null)
+        {
+            evidenceInventory = FindFirstObjectByType<EvidenceInventory>();
+        }
+
+        if (backgroundTransitionManager == null)
+        {
+            backgroundTransitionManager = FindFirstObjectByType<BackgroundTransitionManager>();
+        }
+
         if (interactables == null || interactables.Length == 0)
         {
             interactables = FindObjectsByType<InteractableObject>(FindObjectsSortMode.None);
         }
 
         BindInteractables(true);
+    }
+
+    private void Update()
+    {
+        if (investigationUI == null || !investigationUI.IsVisible)
+        {
+            return;
+        }
+
+        if (Time.frameCount == _lastShownFrame || !WasAdvancePressedThisFrame())
+        {
+            return;
+        }
+
+        if (investigationUI.HasNextLine)
+        {
+            investigationUI.ShowNextLine();
+        }
+        else
+        {
+            investigationUI.Hide();
+            CompleteActiveInteraction();
+        }
     }
 
     private void OnDestroy()
@@ -63,6 +100,11 @@ public sealed class InteractionManager : MonoBehaviour
 
     private void HandleInteractableClicked(InteractableObject interactable)
     {
+        if (investigationUI != null && investigationUI.IsVisible)
+        {
+            return;
+        }
+
         ClueData data = interactable != null ? interactable.Data : null;
         if (data == null)
         {
@@ -70,28 +112,105 @@ public sealed class InteractionManager : MonoBehaviour
         }
 
         bool isFirstInvestigation = _investigatedClueIds.Add(data.ClueId);
-        bool grantedClue = false;
-        string body;
+        List<DialogueLine> lines = isFirstInvestigation
+            ? ResolveDialogueLines(data.EnumerateFirstInvestigationDialogueIds(), data.DisplayName, data.FirstInvestigationText)
+            : ResolveDialogueLines(data.EnumerateAlreadyInvestigatedDialogueIds(), data.DisplayName, data.AlreadyInvestigatedText);
 
-        if (isFirstInvestigation)
-        {
-            body = data.FirstInvestigationText;
-            grantedClue = data.GrantsClueItem;
-        }
-        else
-        {
-            body = data.AlreadyInvestigatedText;
-        }
+        _activeClueData = data;
+        _activeWasFirstInvestigation = isFirstInvestigation;
 
         if (investigationUI != null)
         {
-            investigationUI.Show(data.DisplayName, body);
-        }
+            investigationUI.ShowSequence(lines);
+            _lastShownFrame = Time.frameCount;
 
-        InvestigationCompleted?.Invoke(data, isFirstInvestigation, grantedClue);
+            if (!investigationUI.IsVisible)
+            {
+                CompleteActiveInteraction();
+            }
+        }
+        else
+        {
+            CompleteActiveInteraction();
+        }
     }
 
-    // ===== 저장/로드 연동용 API =====
+    private void CompleteActiveInteraction()
+    {
+        if (_activeClueData == null)
+        {
+            return;
+        }
+
+        ClueData completedData = _activeClueData;
+        bool wasFirstInvestigation = _activeWasFirstInvestigation;
+        bool shouldRunOutcomes = wasFirstInvestigation || !completedData.RunOutcomesOnlyOnFirstInvestigation;
+        bool grantedEvidence = false;
+
+        _activeClueData = null;
+        _activeWasFirstInvestigation = false;
+
+        if (shouldRunOutcomes)
+        {
+            if (evidenceInventory != null && completedData.RewardEvidence != null)
+            {
+                grantedEvidence = evidenceInventory.AddEvidence(completedData.RewardEvidence);
+            }
+
+            if (backgroundTransitionManager != null && completedData.NextBackground != null)
+            {
+                backgroundTransitionManager.TransitionTo(completedData.NextBackground);
+            }
+        }
+
+        InvestigationCompleted?.Invoke(completedData, wasFirstInvestigation, grantedEvidence);
+    }
+
+    private List<DialogueLine> ResolveDialogueLines(IEnumerable<string> dialogueIds, string fallbackSpeaker, string fallbackText)
+    {
+        List<DialogueLine> lines = new();
+
+        if (dialogueIds != null)
+        {
+            foreach (string dialogueId in dialogueIds)
+            {
+                if (dialogueDatabase != null && dialogueDatabase.TryGetEntry(dialogueId, out DialogueEntry entry))
+                {
+                    string speaker = string.IsNullOrWhiteSpace(entry.Speaker) ? fallbackSpeaker : entry.Speaker;
+                    lines.Add(new DialogueLine(speaker, entry.Text));
+                }
+            }
+        }
+
+        if (lines.Count == 0 && !string.IsNullOrWhiteSpace(fallbackText))
+        {
+            lines.Add(new DialogueLine(fallbackSpeaker, fallbackText));
+        }
+
+        return lines;
+    }
+
+    private static bool WasAdvancePressedThisFrame()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Mouse mouse = Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        {
+            return true;
+        }
+
+        Keyboard keyboard = Keyboard.current;
+        return keyboard != null &&
+               (keyboard.spaceKey.wasPressedThisFrame ||
+                keyboard.enterKey.wasPressedThisFrame ||
+                keyboard.escapeKey.wasPressedThisFrame);
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        return Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Escape);
+#else
+        return false;
+#endif
+    }
+
     public IReadOnlyCollection<string> GetInvestigatedIds() => _investigatedClueIds;
 
     public void RestoreInvestigatedIds(IEnumerable<string> investigatedIds)

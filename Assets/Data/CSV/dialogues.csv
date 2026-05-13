@@ -1,0 +1,9 @@
+﻿id,speaker,text,portrait_key,emotion
+object.desk.office.first,책상,"책상 위에는 오래된 재판 기록이 놓여 있다.",,
+object.desk.office.repeat,책상,"이미 살펴본 책상이다.",,
+character.judge.intro.001,판사,"진실은 늘 기록보다 늦게 도착하지.",judge,calm
+object.box.office.first,상자,"상자 안에는 낡은 열쇠 하나가 들어 있다.",,
+object.box.office.repeat,상자,"이미 확인한 상자다.",,
+character.judge.intro.002,나,"기록을 확인하러 왔습니다.",player,neutral
+character.judge.intro.003,판사,"기록만 믿지는 말게. 사람은 기록보다 자주 거짓말을 하니까.",judge,serious
+

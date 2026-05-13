@@ -1,9 +1,6 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 조사 가능한 오브젝트의 정적 데이터.
-/// ScriptableObject로 분리하여 디자이너 친화적으로 관리합니다.
-/// </summary>
 [CreateAssetMenu(fileName = "ClueData", menuName = "Game/Investigation/Clue Data")]
 public sealed class ClueData : ScriptableObject
 {
@@ -11,26 +8,59 @@ public sealed class ClueData : ScriptableObject
     [SerializeField] private string clueId;
     [SerializeField] private string displayName;
 
-    [Header("Texts")]
+    [Header("CSV Dialogue Sequences")]
+    [SerializeField] private string[] firstInvestigationDialogueIds;
+    [SerializeField] private string[] alreadyInvestigatedDialogueIds;
+
+    [Header("Fallback Texts")]
     [TextArea(2, 5)]
     [SerializeField] private string firstInvestigationText;
 
     [TextArea(2, 5)]
     [SerializeField] private string alreadyInvestigatedText = "이미 조사한 대상이다.";
 
-    [Header("Reward")]
-    [SerializeField] private bool grantsClueItem;
+    [Header("Outcomes")]
+    [SerializeField] private EvidenceData rewardEvidence;
+    [SerializeField] private BackgroundData nextBackground;
+    [SerializeField] private bool runOutcomesOnlyOnFirstInvestigation = true;
 
     public string ClueId => clueId;
     public string DisplayName => displayName;
     public string FirstInvestigationText => firstInvestigationText;
     public string AlreadyInvestigatedText => alreadyInvestigatedText;
-    public bool GrantsClueItem => grantsClueItem;
+    public EvidenceData RewardEvidence => rewardEvidence;
+    public BackgroundData NextBackground => nextBackground;
+    public bool RunOutcomesOnlyOnFirstInvestigation => runOutcomesOnlyOnFirstInvestigation;
+
+    public IEnumerable<string> EnumerateFirstInvestigationDialogueIds()
+    {
+        return EnumerateDialogueIds(firstInvestigationDialogueIds);
+    }
+
+    public IEnumerable<string> EnumerateAlreadyInvestigatedDialogueIds()
+    {
+        return EnumerateDialogueIds(alreadyInvestigatedDialogueIds);
+    }
+
+    private static IEnumerable<string> EnumerateDialogueIds(string[] ids)
+    {
+        if (ids == null)
+        {
+            yield break;
+        }
+
+        foreach (string id in ids)
+        {
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                yield return id;
+            }
+        }
+    }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // 세이브 키/식별자 누락 방지용 기본값 자동 보정
         if (string.IsNullOrWhiteSpace(clueId))
         {
             clueId = name;
