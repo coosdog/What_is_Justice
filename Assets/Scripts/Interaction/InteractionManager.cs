@@ -86,6 +86,11 @@ public sealed class InteractionManager : MonoBehaviour
                 continue;
             }
 
+            if (interactable.GetComponent<NpcInteractionObject>() != null)
+            {
+                continue;
+            }
+
             if (bind)
             {
                 interactable.Clicked += HandleInteractableClicked;
@@ -105,6 +110,16 @@ public sealed class InteractionManager : MonoBehaviour
         }
 
         ClueData data = interactable != null ? interactable.Data : null;
+        StartInvestigation(data);
+    }
+
+    public void StartInvestigation(ClueData data)
+    {
+        if (investigationUI != null && investigationUI.IsVisible)
+        {
+            return;
+        }
+
         if (data == null)
         {
             return;

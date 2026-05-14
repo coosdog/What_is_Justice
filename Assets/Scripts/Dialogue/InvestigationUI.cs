@@ -8,6 +8,8 @@ using UnityEngine;
 /// </summary>
 public sealed class InvestigationUI : MonoBehaviour
 {
+    private const string TmpPrewarmText = "\uAC00\uB098\uB2E4\uB77C\uB9C8\uBC14\uC0AC\uC544\uC790\uCC28\uCE74\uD0C0\uD30C\uD558 \uC54C\uB9AC\uBC14\uC774 \uC870\uC0AC \uB300\uD654 \uB3CC\uC544\uAC00\uAE30";
+
     [SerializeField] private GameObject panelRoot;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text bodyText;
@@ -26,6 +28,8 @@ public sealed class InvestigationUI : MonoBehaviour
             panelRoot = gameObject;
         }
 
+        TmpTextPrewarmUtility.Prewarm(titleText, TmpPrewarmText);
+        TmpTextPrewarmUtility.Prewarm(bodyText, TmpPrewarmText);
         ClearTexts();
     }
 
@@ -115,5 +119,6 @@ public sealed class InvestigationUI : MonoBehaviour
             bodyText.text = string.Empty;
         }
     }
+
 }
 

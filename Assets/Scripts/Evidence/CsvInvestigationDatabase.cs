@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public sealed class CsvInvestigationDatabase : MonoBehaviour
 {
@@ -66,6 +69,8 @@ public sealed class CsvInvestigationDatabase : MonoBehaviour
 
     public void LoadAll()
     {
+        EnsureDefaultCsvSources();
+
         _keywordsById.Clear();
         _evidenceById.Clear();
         _npcInquiriesById.Clear();
@@ -75,6 +80,21 @@ public sealed class CsvInvestigationDatabase : MonoBehaviour
         LoadEvidence();
         LoadNpcInquiries();
         LoadNpcInquiryTopics();
+    }
+
+    private void EnsureDefaultCsvSources()
+    {
+#if UNITY_EDITOR
+        keywordsCsv ??= AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/CSV/keywords.csv");
+        evidenceCsv ??= AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/CSV/evidence.csv");
+        npcInquiriesCsv ??= AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/CSV/npc_inquiries.csv");
+        npcInquiryTopicsCsv ??= AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/CSV/npc_inquiry_topics.csv");
+#endif
+
+        keywordsCsv ??= Resources.Load<TextAsset>("CSV/keywords");
+        evidenceCsv ??= Resources.Load<TextAsset>("CSV/evidence");
+        npcInquiriesCsv ??= Resources.Load<TextAsset>("CSV/npc_inquiries");
+        npcInquiryTopicsCsv ??= Resources.Load<TextAsset>("CSV/npc_inquiry_topics");
     }
 
     private void LoadKeywords()

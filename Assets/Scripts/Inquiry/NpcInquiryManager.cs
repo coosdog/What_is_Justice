@@ -11,6 +11,11 @@ public sealed class NpcInquiryManager : MonoBehaviour
 
     private void Awake()
     {
+        ResolveReferences();
+    }
+
+    private void ResolveReferences()
+    {
         if (evidenceInventory == null)
         {
             evidenceInventory = FindFirstObjectByType<EvidenceInventory>();
@@ -39,6 +44,8 @@ public sealed class NpcInquiryManager : MonoBehaviour
 
     public void StartInquiry(NpcInquiryData npcData)
     {
+        ResolveReferences();
+
         if (npcData == null || investigationUI == null || IsBusy())
         {
             return;
@@ -56,11 +63,19 @@ public sealed class NpcInquiryManager : MonoBehaviour
             return;
         }
 
+        if (evidenceInventory.Keywords.Count == 0)
+        {
+            ShowDialogue(npcData.EnumerateNoKeywordDialogueIds(), npcData.DisplayName, npcData.NoKeywordFallbackText);
+            return;
+        }
+
         keywordSelectionUI.Show($"{npcData.DisplayName}에게 무엇을 물어볼까?", evidenceInventory.Keywords, keyword => HandleKeywordSelected(npcData, keyword));
     }
 
     public void StartInquiry(string npcId)
     {
+        ResolveReferences();
+
         if (string.IsNullOrWhiteSpace(npcId) || investigationUI == null || IsBusy())
         {
             return;
@@ -84,12 +99,19 @@ public sealed class NpcInquiryManager : MonoBehaviour
             return;
         }
 
+        if (evidenceInventory.CsvKeywords.Count == 0)
+        {
+            ShowDialogue(npcData.NoKeywordDialogueIds, npcData.DisplayName, npcData.NoKeywordFallbackText);
+            return;
+        }
+
         keywordSelectionUI.ShowCsv($"{npcData.DisplayName}에게 무엇을 물어볼까?", evidenceInventory.CsvKeywords, keyword => HandleCsvKeywordSelected(npcData, keyword));
     }
 
     private bool IsBusy()
     {
-        return investigationUI.IsVisible || (keywordSelectionUI != null && keywordSelectionUI.IsVisible);
+        return investigationUI != null && investigationUI.IsVisible ||
+               keywordSelectionUI != null && keywordSelectionUI.IsVisible;
     }
 
     private void HandleKeywordSelected(NpcInquiryData npcData, KeywordData keyword)

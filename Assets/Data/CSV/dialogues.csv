@@ -6,8 +6,13 @@ object.box.office.first,상자,"상자 안에는 낡은 열쇠 하나가 들어 
 object.box.office.repeat,상자,"이미 확인한 상자다.",,
 character.judge.intro.002,나,"기록을 확인하러 왔습니다.",player,neutral
 character.judge.intro.003,판사,"기록만 믿지는 말게. 사람은 기록보다 자주 거짓말을 하니까.",judge,serious
-character.witness.no_keyword.001,목격자,"지금은 특별히 할 말이 없습니다.",witness,neutral
+character.witness.no_keyword.001,목격자,"아직 물어볼 만한 단서가 없습니다.",witness,neutral
 character.witness.unknown_keyword.001,목격자,"그 이야기는 잘 모르겠습니다.",witness,neutral
 character.witness.alibi.001,목격자,"그 시간에는 법원 복도에 있었습니다.",witness,nervous
 character.witness.alibi.002,목격자,"하지만 누군가 계단 쪽으로 뛰어가는 소리는 들었습니다.",witness,nervous
+object.csv_test.alibi_note.first,알리바이 메모,"찢어진 메모에는 사건 시각과 목격자의 위치가 적혀 있다.",,
+object.csv_test.alibi_note.repeat,알리바이 메모,"이미 확인한 메모다. 알리바이라는 키워드는 계속 사용할 수 있다.",,
+character.witness.casual.001,목격자,"오늘 법원은 평소보다 조용하네요.",witness,neutral
+character.witness.casual.002,목격자,"별일 없으면 저는 곧 돌아가 보겠습니다.",witness,neutral
+character.witness.casual.repeat,목격자,"아까 말씀드린 것 말고는 특별한 이야기가 없습니다.",witness,neutral
 
