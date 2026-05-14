@@ -17,6 +17,7 @@ public sealed class InvestigationUI : MonoBehaviour
 
     public bool IsVisible => panelRoot != null && panelRoot.activeSelf;
     public bool HasNextLine => IsVisible && _currentLineIndex + 1 < _lines.Count;
+    public int LastShownFrame { get; private set; } = -1;
 
     private void Awake()
     {
@@ -59,6 +60,7 @@ public sealed class InvestigationUI : MonoBehaviour
         }
 
         _currentLineIndex = 0;
+        LastShownFrame = Time.frameCount;
         panelRoot.SetActive(true);
         RenderCurrentLine();
     }
@@ -114,3 +116,4 @@ public sealed class InvestigationUI : MonoBehaviour
         }
     }
 }
+

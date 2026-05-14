@@ -21,6 +21,7 @@ public sealed class ClueData : ScriptableObject
 
     [Header("Outcomes")]
     [SerializeField] private EvidenceData rewardEvidence;
+    [SerializeField] private string rewardEvidenceId;
     [SerializeField] private BackgroundData nextBackground;
     [SerializeField] private bool runOutcomesOnlyOnFirstInvestigation = true;
 
@@ -29,6 +30,7 @@ public sealed class ClueData : ScriptableObject
     public string FirstInvestigationText => firstInvestigationText;
     public string AlreadyInvestigatedText => alreadyInvestigatedText;
     public EvidenceData RewardEvidence => rewardEvidence;
+    public string RewardEvidenceId => rewardEvidenceId;
     public BackgroundData NextBackground => nextBackground;
     public bool RunOutcomesOnlyOnFirstInvestigation => runOutcomesOnlyOnFirstInvestigation;
 
@@ -68,3 +70,4 @@ public sealed class ClueData : ScriptableObject
     }
 #endif
 }
+

@@ -18,7 +18,6 @@ public sealed class InteractionManager : MonoBehaviour
     private readonly HashSet<string> _investigatedClueIds = new();
     private ClueData _activeClueData;
     private bool _activeWasFirstInvestigation;
-    private int _lastShownFrame = -1;
 
     private void Awake()
     {
@@ -52,7 +51,7 @@ public sealed class InteractionManager : MonoBehaviour
             return;
         }
 
-        if (Time.frameCount == _lastShownFrame || !WasAdvancePressedThisFrame())
+        if (Time.frameCount == investigationUI.LastShownFrame || !WasAdvancePressedThisFrame())
         {
             return;
         }
@@ -122,7 +121,6 @@ public sealed class InteractionManager : MonoBehaviour
         if (investigationUI != null)
         {
             investigationUI.ShowSequence(lines);
-            _lastShownFrame = Time.frameCount;
 
             if (!investigationUI.IsVisible)
             {
@@ -152,9 +150,16 @@ public sealed class InteractionManager : MonoBehaviour
 
         if (shouldRunOutcomes)
         {
-            if (evidenceInventory != null && completedData.RewardEvidence != null)
+            if (evidenceInventory != null)
             {
-                grantedEvidence = evidenceInventory.AddEvidence(completedData.RewardEvidence);
+                if (completedData.RewardEvidence != null)
+                {
+                    grantedEvidence = evidenceInventory.AddEvidence(completedData.RewardEvidence);
+                }
+                else if (!string.IsNullOrWhiteSpace(completedData.RewardEvidenceId))
+                {
+                    grantedEvidence = evidenceInventory.AddEvidence(completedData.RewardEvidenceId);
+                }
             }
 
             if (backgroundTransitionManager != null && completedData.NextBackground != null)
@@ -230,3 +235,5 @@ public sealed class InteractionManager : MonoBehaviour
         }
     }
 }
+
+

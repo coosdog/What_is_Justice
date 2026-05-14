@@ -1,0 +1,2 @@
+﻿npc_id,display_name,no_keyword_dialogue_ids,unknown_keyword_dialogue_ids,no_keyword_fallback_text,unknown_keyword_fallback_text
+npc.witness,목격자,character.witness.no_keyword.001,character.witness.unknown_keyword.001,아직 물어볼 만한 단서가 없다.,그 이야기에 대해서는 아는 것이 없다.

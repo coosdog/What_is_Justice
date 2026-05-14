@@ -6,4 +6,8 @@ object.box.office.first,상자,"상자 안에는 낡은 열쇠 하나가 들어 
 object.box.office.repeat,상자,"이미 확인한 상자다.",,
 character.judge.intro.002,나,"기록을 확인하러 왔습니다.",player,neutral
 character.judge.intro.003,판사,"기록만 믿지는 말게. 사람은 기록보다 자주 거짓말을 하니까.",judge,serious
+character.witness.no_keyword.001,목격자,"지금은 특별히 할 말이 없습니다.",witness,neutral
+character.witness.unknown_keyword.001,목격자,"그 이야기는 잘 모르겠습니다.",witness,neutral
+character.witness.alibi.001,목격자,"그 시간에는 법원 복도에 있었습니다.",witness,nervous
+character.witness.alibi.002,목격자,"하지만 누군가 계단 쪽으로 뛰어가는 소리는 들었습니다.",witness,nervous
 

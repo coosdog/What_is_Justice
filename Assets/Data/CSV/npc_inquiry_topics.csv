@@ -1,0 +1,2 @@
+﻿npc_id,keyword_id,response_dialogue_ids,fallback_response_text
+npc.witness,keyword.alibi,character.witness.alibi.001|character.witness.alibi.002,그 시간에는 법원 복도에 있었습니다.
