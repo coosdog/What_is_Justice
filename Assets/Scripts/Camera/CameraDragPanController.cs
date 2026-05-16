@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -141,7 +140,7 @@ public sealed class CameraDragPanController : MonoBehaviour
             return false;
         }
 
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        if (PointerUiBlocker.IsBlocked(screenPosition))
         {
             return false;
         }

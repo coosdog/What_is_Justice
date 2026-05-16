@@ -5,24 +5,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-public sealed class EvidenceNotebookUI : MonoBehaviour
+public sealed class EvidenceNotebookUI : BasePanelUI
 {
     private const string TmpPrewarmText = "\uAC00\uB098\uB2E4\uB77C\uB9C8\uBC14\uC0AC\uC544\uC790\uCC28\uCE74\uD0C0\uD30C\uD558 \uC99D\uAC70 \uB2E8\uC11C \uD0A4\uC6CC\uB4DC \uC54C\uB9AC\uBC14\uC774";
 
-    [SerializeField] private GameObject panelRoot;
     [SerializeField] private TMP_Text bodyText;
     [SerializeField] private EvidenceInventory evidenceInventory;
     [SerializeField] private bool toggleWithKeyboard = true;
     [SerializeField] private KeyCode legacyToggleKey = KeyCode.N;
 
-    public bool IsVisible => panelRoot != null && panelRoot.activeSelf;
-
-    private void Awake()
+    protected override void Awake()
     {
-        if (panelRoot == null)
-        {
-            panelRoot = gameObject;
-        }
+        base.Awake();
 
         if (evidenceInventory == null)
         {
@@ -41,38 +35,19 @@ public sealed class EvidenceNotebookUI : MonoBehaviour
         }
     }
 
-    public void Toggle()
-    {
-        if (IsVisible)
-        {
-            Hide();
-        }
-        else
-        {
-            Show();
-        }
-    }
-
-    public void Show()
+    public override void Show()
     {
         Refresh();
-        if (panelRoot != null)
-        {
-            panelRoot.SetActive(true);
-        }
+        base.Show();
     }
 
-    public void Hide()
+    public override void Hide()
     {
         if (bodyText != null)
         {
             bodyText.text = string.Empty;
         }
-
-        if (panelRoot != null)
-        {
-            panelRoot.SetActive(false);
-        }
+        base.Hide();
     }
 
     public void Refresh()

@@ -11,6 +11,7 @@ public sealed class InteractionManager : MonoBehaviour
     [SerializeField] private CsvDialogueDatabase dialogueDatabase;
     [SerializeField] private EvidenceInventory evidenceInventory;
     [SerializeField] private BackgroundTransitionManager backgroundTransitionManager;
+    [SerializeField] private PlayerDispositionManager dispositionManager;
     [SerializeField] private InteractableObject[] interactables;
 
     public event Action<ClueData, bool, bool> InvestigationCompleted;
@@ -34,6 +35,11 @@ public sealed class InteractionManager : MonoBehaviour
         if (backgroundTransitionManager == null)
         {
             backgroundTransitionManager = FindFirstObjectByType<BackgroundTransitionManager>();
+        }
+
+        if (dispositionManager == null)
+        {
+            dispositionManager = FindFirstObjectByType<PlayerDispositionManager>();
         }
 
         if (interactables == null || interactables.Length == 0)
@@ -126,9 +132,10 @@ public sealed class InteractionManager : MonoBehaviour
         }
 
         bool isFirstInvestigation = _investigatedClueIds.Add(data.ClueId);
+        PlayerDisposition disposition = dispositionManager != null ? dispositionManager.CurrentDisposition : PlayerDisposition.Basic;
         List<DialogueLine> lines = isFirstInvestigation
-            ? ResolveDialogueLines(data.EnumerateFirstInvestigationDialogueIds(), data.DisplayName, data.FirstInvestigationText)
-            : ResolveDialogueLines(data.EnumerateAlreadyInvestigatedDialogueIds(), data.DisplayName, data.AlreadyInvestigatedText);
+            ? ResolveDialogueLines(data.EnumerateFirstInvestigationDialogueIds(disposition), data.DisplayName, data.GetFirstInvestigationText(disposition))
+            : ResolveDialogueLines(data.EnumerateAlreadyInvestigatedDialogueIds(disposition), data.DisplayName, data.GetAlreadyInvestigatedText(disposition));
 
         _activeClueData = data;
         _activeWasFirstInvestigation = isFirstInvestigation;

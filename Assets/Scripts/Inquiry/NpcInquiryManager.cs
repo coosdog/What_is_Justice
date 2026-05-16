@@ -8,6 +8,7 @@ public sealed class NpcInquiryManager : MonoBehaviour
     [SerializeField] private CsvInvestigationDatabase csvInvestigationDatabase;
     [SerializeField] private InvestigationUI investigationUI;
     [SerializeField] private KeywordSelectionUI keywordSelectionUI;
+    [SerializeField] private PlayerDispositionManager dispositionManager;
 
     private void Awake()
     {
@@ -39,6 +40,11 @@ public sealed class NpcInquiryManager : MonoBehaviour
         if (keywordSelectionUI == null)
         {
             keywordSelectionUI = FindFirstObjectByType<KeywordSelectionUI>();
+        }
+
+        if (dispositionManager == null)
+        {
+            dispositionManager = FindFirstObjectByType<PlayerDispositionManager>();
         }
     }
 
@@ -138,7 +144,8 @@ public sealed class NpcInquiryManager : MonoBehaviour
             return;
         }
 
-        if (csvInvestigationDatabase != null && csvInvestigationDatabase.TryGetNpcTopic(npcData.NpcId, keyword.KeywordId, out CsvNpcInquiryTopicRecord topic))
+        PlayerDisposition disposition = dispositionManager != null ? dispositionManager.CurrentDisposition : PlayerDisposition.Basic;
+        if (csvInvestigationDatabase != null && csvInvestigationDatabase.TryGetNpcTopic(npcData.NpcId, keyword.KeywordId, disposition, out CsvNpcInquiryTopicRecord topic))
         {
             ShowDialogue(topic.ResponseDialogueIds, npcData.DisplayName, topic.FallbackResponseText);
         }

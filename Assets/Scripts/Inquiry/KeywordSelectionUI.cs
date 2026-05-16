@@ -4,11 +4,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class KeywordSelectionUI : MonoBehaviour
+public sealed class KeywordSelectionUI : BasePanelUI
 {
     private const string TmpPrewarmText = "\uD0A4\uC6CC\uB4DC \uBB34\uC5C7\uC744 \uBB3C\uC5B4\uBCFC\uAE4C \uB3CC\uC544\uAC00\uAE30 \uC54C\uB9AC\uBC14\uC774";
 
-    [SerializeField] private GameObject panelRoot;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private Transform buttonContainer;
     [SerializeField] private Button keywordButtonPrefab;
@@ -19,10 +18,9 @@ public sealed class KeywordSelectionUI : MonoBehaviour
     private Action<CsvKeywordRecord> _csvKeywordSelected;
     private bool _cancelBound;
 
-    public bool IsVisible => panelRoot != null && panelRoot.activeSelf;
-
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         BindCancelButton();
         PrewarmTexts();
         Hide();
@@ -50,7 +48,7 @@ public sealed class KeywordSelectionUI : MonoBehaviour
             }
         }
 
-        panelRoot.SetActive(true);
+        base.Show();
     }
 
     public void ShowCsv(string title, IEnumerable<CsvKeywordRecord> keywords, Action<CsvKeywordRecord> keywordSelected)
@@ -75,20 +73,16 @@ public sealed class KeywordSelectionUI : MonoBehaviour
             }
         }
 
-        panelRoot.SetActive(true);
+        base.Show();
     }
 
-    public void Hide()
+    public override void Hide()
     {
         ClearButtons();
         _keywordSelected = null;
         _csvKeywordSelected = null;
         SetTitle(string.Empty);
-
-        if (panelRoot != null)
-        {
-            panelRoot.SetActive(false);
-        }
+        base.Hide();
     }
 
     private void CreateKeywordButton(KeywordData keyword)

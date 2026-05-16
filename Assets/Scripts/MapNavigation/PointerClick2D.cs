@@ -1,11 +1,9 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
-[RequireComponent(typeof(BoxCollider2D))]
 public sealed class PointerClick2D : MonoBehaviour
 {
     [SerializeField] private Camera targetCamera;
@@ -36,7 +34,7 @@ public sealed class PointerClick2D : MonoBehaviour
             return;
         }
 
-        if (ignoreWhenPointerIsOverUI && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        if (ignoreWhenPointerIsOverUI && PointerUiBlocker.IsBlocked(screenPosition))
         {
             return;
         }

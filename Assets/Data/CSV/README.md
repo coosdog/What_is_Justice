@@ -84,3 +84,20 @@ character.detective.office.001
 First Investigation Dialogue Id = object.desk.office.first
 Already Investigated Dialogue Id = object.desk.office.repeat
 ```
+
+## 성향별 차이
+
+플레이어 성향은 `Basic`, `Tendency1`, `Tendency2` 세 값으로 구분합니다.
+
+- 사물 조사 대사는 `ClueData`의 `Disposition Overrides`에 성향별 대사 ID나 fallback 문장을 넣어 바꿀 수 있습니다.
+- NPC 탐문 CSV는 `npc_inquiry_topics.csv`에 선택 컬럼 `disposition`을 추가하면 성향별 응답을 분리할 수 있습니다.
+- `disposition`이 비어 있거나 `basic`이면 기본 응답으로 쓰이고, `Tendency1`, `Tendency2` 행이 있으면 현재 성향에 맞는 응답이 우선됩니다.
+
+예시:
+
+```csv
+npc_id,keyword_id,disposition,response_dialogue_ids,fallback_response_text
+witness,keyword.alibi,basic,npc.witness.alibi.basic,평범한 반응입니다.
+witness,keyword.alibi,Tendency1,npc.witness.alibi.t1,성향 1에서 더 의심스럽게 받아들입니다.
+witness,keyword.alibi,Tendency2,npc.witness.alibi.t2,성향 2에서 다른 단서를 떠올립니다.
+```

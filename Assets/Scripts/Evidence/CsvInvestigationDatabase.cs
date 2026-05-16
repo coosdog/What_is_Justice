@@ -44,6 +44,11 @@ public sealed class CsvInvestigationDatabase : MonoBehaviour
 
     public bool TryGetNpcTopic(string npcId, string keywordId, out CsvNpcInquiryTopicRecord topic)
     {
+        return TryGetNpcTopic(npcId, keywordId, PlayerDisposition.Basic, out topic);
+    }
+
+    public bool TryGetNpcTopic(string npcId, string keywordId, PlayerDisposition disposition, out CsvNpcInquiryTopicRecord topic)
+    {
         topic = null;
         if (string.IsNullOrWhiteSpace(npcId) || string.IsNullOrWhiteSpace(keywordId))
         {
@@ -55,16 +60,29 @@ public sealed class CsvInvestigationDatabase : MonoBehaviour
             return false;
         }
 
+        CsvNpcInquiryTopicRecord fallbackTopic = null;
         foreach (CsvNpcInquiryTopicRecord candidate in topics)
         {
-            if (string.Equals(candidate.KeywordId, keywordId.Trim(), StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(candidate.KeywordId, keywordId.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(candidate.Disposition) || string.Equals(candidate.Disposition, "basic", StringComparison.OrdinalIgnoreCase))
+            {
+                fallbackTopic ??= candidate;
+                continue;
+            }
+
+            if (string.Equals(candidate.Disposition, disposition.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 topic = candidate;
                 return true;
             }
         }
 
-        return false;
+        topic = fallbackTopic;
+        return topic != null;
     }
 
     public void LoadAll()
@@ -156,6 +174,7 @@ public sealed class CsvInvestigationDatabase : MonoBehaviour
             CsvNpcInquiryTopicRecord record = new CsvNpcInquiryTopicRecord(
                 GetCell(row, headers, "npc_id"),
                 GetCell(row, headers, "keyword_id"),
+                GetCell(row, headers, "disposition"),
                 SplitIds(GetCell(row, headers, "response_dialogue_ids")),
                 GetCell(row, headers, "fallback_response_text"));
 

@@ -1,2 +1,4 @@
-﻿npc_id,keyword_id,response_dialogue_ids,fallback_response_text
-npc.witness,keyword.alibi,character.witness.alibi.001|character.witness.alibi.002,그 시간에는 법원 복도에 있었습니다.
+npc_id,keyword_id,disposition,response_dialogue_ids,fallback_response_text
+npc.witness,keyword.alibi,basic,character.witness.alibi.001|character.witness.alibi.002,그 시간에는 법원 복도에 있었습니다.
+npc.witness,keyword.alibi,Tendency1,,성향 1로 보면 목격자의 말끝이 조금 흐려 보입니다.
+npc.witness,keyword.alibi,Tendency2,,성향 2로 보면 목격자가 장소보다 시간을 더 신경 쓰는 것 같습니다.

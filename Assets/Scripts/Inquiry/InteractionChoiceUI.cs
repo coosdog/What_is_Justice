@@ -3,11 +3,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class InteractionChoiceUI : MonoBehaviour
+public sealed class InteractionChoiceUI : BasePanelUI
 {
     private const string TmpPrewarmText = "\uBAA9\uACA9\uC790 \uB300\uD654\uD558\uAE30 \uC870\uC0AC\uD558\uAE30 \uB3CC\uC544\uAC00\uAE30";
 
-    [SerializeField] private GameObject panelRoot;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private Button talkButton;
     [SerializeField] private Button inquiryButton;
@@ -17,10 +16,9 @@ public sealed class InteractionChoiceUI : MonoBehaviour
     private Action _inquirySelected;
     private bool _buttonsBound;
 
-    public bool IsVisible => panelRoot != null && panelRoot.activeSelf;
-
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         BindButtons();
         PrewarmTexts();
         Hide();
@@ -43,18 +41,14 @@ public sealed class InteractionChoiceUI : MonoBehaviour
             titleText.text = title;
         }
 
-        panelRoot.SetActive(true);
+        base.Show();
     }
 
-    public void Hide()
+    public override void Hide()
     {
         _talkSelected = null;
         _inquirySelected = null;
-
-        if (panelRoot != null)
-        {
-            panelRoot.SetActive(false);
-        }
+        base.Hide();
     }
 
     private void SelectTalk()
