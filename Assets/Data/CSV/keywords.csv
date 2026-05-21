@@ -1,2 +1,6 @@
-﻿keyword_id,display_name,description
+keyword_id,display_name,description
 keyword.alibi,알리바이,사건 발생 시각에 어디 있었는지에 대한 정보.
+keyword.accident,5년 전 사고,강민혁의 음주운전 사고와 무죄 판결에 대한 질문.
+keyword.kang_return,복귀 다큐,강민혁의 연예계 복귀와 다큐멘터리 촬영에 대한 질문.
+keyword.victim,피해자 가족,사고로 무너진 사람들과 남겨진 죄책감에 대한 질문.
+keyword.lodge,눈내리는 산장,외부와 단절된 산장과 촬영 장소에 대한 질문.

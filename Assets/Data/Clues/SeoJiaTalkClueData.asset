@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0896c081b7e75646bda0c598fdb1109, type: 3}
+  m_Name: SeoJiaTalkClueData
+  m_EditorClassIdentifier: Assembly-CSharp::ClueData
+  clueId: npc.seo_jia.talk
+  displayName: "서지아"
+  firstInvestigationDialogueIds: []
+  alreadyInvestigatedDialogueIds: []
+  firstInvestigationText: "카메라가 꺼진 뒤의 이야기가 더 중요할 때도 있죠."
+  alreadyInvestigatedText: "지금은 더 드릴 말씀이 없어요."
+  dispositionOverrides: []
+  rewardEvidence: {fileID: 0}
+  rewardEvidenceId: 
+  nextBackground: {fileID: 0}
+  runOutcomesOnlyOnFirstInvestigation: 1

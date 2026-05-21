@@ -32,6 +32,10 @@ public sealed class PlayerDispositionManager : MonoBehaviour
         {
             SetDisposition(PlayerDisposition.Tendency2);
         }
+        else if (WasPressed(4))
+        {
+            SetDisposition(PlayerDisposition.Tendency3);
+        }
     }
 
     public void SetDisposition(PlayerDisposition disposition)
@@ -49,9 +53,10 @@ public sealed class PlayerDispositionManager : MonoBehaviour
     {
         return currentDisposition switch
         {
-            PlayerDisposition.Tendency1 => "성향 1",
-            PlayerDisposition.Tendency2 => "성향 2",
-            _ => "기본"
+            PlayerDisposition.Tendency1 => "\uC131\uD5A5 1",
+            PlayerDisposition.Tendency2 => "\uC131\uD5A5 2",
+            PlayerDisposition.Tendency3 => "\uC131\uD5A5 3",
+            _ => "\uAE30\uBCF8"
         };
     }
 
@@ -69,6 +74,7 @@ public sealed class PlayerDispositionManager : MonoBehaviour
             1 => keyboard.digit1Key.wasPressedThisFrame || keyboard.numpad1Key.wasPressedThisFrame,
             2 => keyboard.digit2Key.wasPressedThisFrame || keyboard.numpad2Key.wasPressedThisFrame,
             3 => keyboard.digit3Key.wasPressedThisFrame || keyboard.numpad3Key.wasPressedThisFrame,
+            4 => keyboard.digit4Key.wasPressedThisFrame || keyboard.numpad4Key.wasPressedThisFrame,
             _ => false
         };
 #elif ENABLE_LEGACY_INPUT_MANAGER
@@ -77,6 +83,7 @@ public sealed class PlayerDispositionManager : MonoBehaviour
             1 => Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1),
             2 => Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2),
             3 => Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3),
+            4 => Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4),
             _ => false
         };
 #else

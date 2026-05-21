@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0896c081b7e75646bda0c598fdb1109, type: 3}
+  m_Name: HanSeongmiTalkClueData
+  m_EditorClassIdentifier: Assembly-CSharp::ClueData
+  clueId: npc.han_seongmi.talk
+  displayName: "한성미"
+  firstInvestigationDialogueIds: []
+  alreadyInvestigatedDialogueIds: []
+  firstInvestigationText: "낯선 사람과 이야기하는 건 아직 조금 어렵네요."
+  alreadyInvestigatedText: "죄송해요. 지금은 더 말하기 힘들어요."
+  dispositionOverrides: []
+  rewardEvidence: {fileID: 0}
+  rewardEvidenceId: 
+  nextBackground: {fileID: 0}
+  runOutcomesOnlyOnFirstInvestigation: 1

@@ -1,0 +1,9 @@
+assistant_dialogue_id,trigger_type,condition_id,disposition,response_dialogue_ids,fallback_text
+assistant.manual.basic,ManualTalk,none,basic,,뭘 봐요. 도망 안 가요. 아직은.
+assistant.manual.tendency1,ManualTalk,none,Tendency1,,시키는 대로 하긴 할게요. 대신 제가 먼저 눈치챈 건 제 공으로 쳐줘요.
+assistant.manual.tendency2,ManualTalk,none,Tendency2,,또 저한테 묻는 거예요? 좋아요. 하지만 이번엔 제 말도 좀 믿어줘요.
+assistant.manual.tendency3,ManualTalk,none,Tendency3,,냄새가 이상해요. 누가 여기서 뭔가를 숨겼거나 급하게 치운 것 같아요.
+assistant.alibi_note.basic,EvidenceAcquired,evidence.alibi_note,basic,,그 메모, 누가 일부러 남긴 것 같아요. 저라면 저런 식으로 흔적을 흘리진 않겠지만.
+assistant.alibi_note.tendency1,EvidenceAcquired,evidence.alibi_note,Tendency1,,그 메모, 그냥 흘린 건 아닌 것 같은데요. 제가 훔쳤다면 저렇게 대놓고 두진 않았을 거예요.
+assistant.alibi_note.tendency2,EvidenceAcquired,evidence.alibi_note,Tendency2,,알리바이라... 보통 그런 말은 빠져나갈 구멍이 필요할 때 먼저 준비하죠.
+assistant.alibi_note.tendency3,EvidenceAcquired,evidence.alibi_note,Tendency3,,종이 냄새가 새것은 아니에요. 오래 숨겨뒀다가 꺼낸 물건 같아요.

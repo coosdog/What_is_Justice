@@ -1,8 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(PointerClick2D))]
-public sealed class NpcInteractionObject : MonoBehaviour
+public sealed class NpcInteractionObject : ClickableInquiryObject
 {
     [SerializeField] private string displayName;
     [SerializeField] private ClueData conversationData;
@@ -12,17 +10,14 @@ public sealed class NpcInteractionObject : MonoBehaviour
     [SerializeField] private InteractionChoiceUI choiceUI;
     [SerializeField] private InvestigationUI investigationUI;
 
-    private PointerClick2D _clickable;
-
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         ResolveReferences();
     }
 
     private void ResolveReferences()
     {
-        _clickable = GetComponent<PointerClick2D>();
-
         if (interactionManager == null)
         {
             interactionManager = FindFirstObjectByType<InteractionManager>();
@@ -44,23 +39,7 @@ public sealed class NpcInteractionObject : MonoBehaviour
         }
     }
 
-    private void OnEnable()
-    {
-        if (_clickable != null)
-        {
-            _clickable.Clicked += HandleClicked;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (_clickable != null)
-        {
-            _clickable.Clicked -= HandleClicked;
-        }
-    }
-
-    private void HandleClicked()
+    protected override void OnClicked()
     {
         ResolveReferences();
 

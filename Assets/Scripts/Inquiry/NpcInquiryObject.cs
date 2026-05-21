@@ -1,41 +1,21 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(PointerClick2D))]
-public sealed class NpcInquiryObject : MonoBehaviour
+public sealed class NpcInquiryObject : ClickableInquiryObject
 {
     [SerializeField] private NpcInquiryData inquiryData;
     [SerializeField] private string npcId;
     [SerializeField] private NpcInquiryManager inquiryManager;
 
-    private PointerClick2D _clickable;
-
-    private void Awake()
+    protected override void Awake()
     {
-        _clickable = GetComponent<PointerClick2D>();
+        base.Awake();
         if (inquiryManager == null)
         {
             inquiryManager = FindFirstObjectByType<NpcInquiryManager>();
         }
     }
 
-    private void OnEnable()
-    {
-        if (_clickable != null)
-        {
-            _clickable.Clicked += HandleClicked;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (_clickable != null)
-        {
-            _clickable.Clicked -= HandleClicked;
-        }
-    }
-
-    private void HandleClicked()
+    protected override void OnClicked()
     {
         if (inquiryManager == null)
         {

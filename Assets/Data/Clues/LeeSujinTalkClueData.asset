@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0896c081b7e75646bda0c598fdb1109, type: 3}
+  m_Name: LeeSujinTalkClueData
+  m_EditorClassIdentifier: Assembly-CSharp::ClueData
+  clueId: npc.lee_sujin.talk
+  displayName: "이수진"
+  firstInvestigationDialogueIds: []
+  alreadyInvestigatedDialogueIds: []
+  firstInvestigationText: "필요한 안내가 있으면 말씀해주세요. 제가 아는 선에서는 도와드릴게요."
+  alreadyInvestigatedText: "안내해드릴 수 있는 건 방금 말씀드린 정도예요."
+  dispositionOverrides: []
+  rewardEvidence: {fileID: 0}
+  rewardEvidenceId: 
+  nextBackground: {fileID: 0}
+  runOutcomesOnlyOnFirstInvestigation: 1

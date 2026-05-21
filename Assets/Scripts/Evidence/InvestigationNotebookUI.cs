@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -45,7 +45,11 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     [SerializeField] private bool toggleWithKeyboard = true;
     [SerializeField] private KeyCode legacyToggleKey = KeyCode.N;
 
+    [Header("Overlay")]
+    [SerializeField] private GameObject[] hideWhileOpen;
+
     private NotebookTab _currentTab = NotebookTab.Evidence;
+    private readonly Dictionary<GameObject, bool> _hiddenObjectStates = new();
 
     protected override void Awake()
     {
@@ -97,6 +101,8 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         {
             dispositionManager.DispositionChanged -= HandleDispositionChanged;
         }
+
+        RestoreHiddenObjects();
     }
 
     private void Update()
@@ -110,6 +116,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     public override void Show()
     {
         ResolveReferences();
+        HideOverlappedObjects();
         base.Show();
         Refresh();
     }
@@ -117,6 +124,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     public override void Hide()
     {
         base.Hide();
+        RestoreHiddenObjects();
     }
 
     public void ShowEvidenceTab() => SelectTab(NotebookTab.Evidence);
@@ -141,7 +149,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         if (dispositionText != null)
         {
             string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "기본";
-            dispositionText.text = $"현재 성향: {disposition}    1 기본 / 2 성향 1 / 3 성향 2";
+            dispositionText.text = $"현재 성향: {disposition}    1 기본 / 2 성향 1 / 3 성향 2 / 4 성향 3";
         }
 
         switch (_currentTab)
@@ -167,7 +175,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     private void RenderEvidenceTab()
     {
         SetTitles("단서 이미지", "모은 단서");
-        SetBodies("선택한 단서의 이미지를 이 영역에 배치할 예정입니다.", BuildEvidenceText());
+        SetBodies("선택한 단서의 이미지가 표시될 영역입니다.", BuildEvidenceText());
     }
 
     private void RenderNpcTab()
@@ -191,7 +199,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             builder.AppendLine("아직 등록된 NPC 정보가 없습니다.");
         }
 
-        SetBodies("선택한 NPC의 초상이나 단서를 이 영역에 배치할 예정입니다.", builder.ToString());
+        SetBodies("선택한 NPC의 초상이나 단서를 표시할 영역입니다.", builder.ToString());
     }
 
     private void RenderDialogueLogTab()
@@ -213,7 +221,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             builder.AppendLine("아직 기록된 대화가 없습니다.");
         }
 
-        SetBodies("최근 대화와 연결된 장면 이미지를 배치할 예정입니다.", builder.ToString());
+        SetBodies("최근 대화와 연결된 장면 이미지가 표시될 영역입니다.", builder.ToString());
     }
 
     private void RenderReflectionTab()
@@ -224,7 +232,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             ? assistantDiscussionManager.BuildReflectionText()
             : $"{disposition} 성향으로 지금까지 얻은 단서를 정리합니다.";
 
-        SetBodies("플레이어가 혼자 단서를 재배열하는 영역입니다.", body);
+        SetBodies("플레이어가 혼자 단서를 되짚어보는 영역입니다.", body);
     }
 
     private void RenderAssistantTab()
@@ -392,6 +400,60 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         {
             builder.AppendLine(value);
         }
+    }
+
+    private void HideOverlappedObjects()
+    {
+        if (hideWhileOpen == null || hideWhileOpen.Length == 0)
+        {
+            return;
+        }
+
+        foreach (GameObject target in hideWhileOpen)
+        {
+            if (ShouldSkipHiddenObject(target) || _hiddenObjectStates.ContainsKey(target))
+            {
+                continue;
+            }
+
+            _hiddenObjectStates.Add(target, target.activeSelf);
+            target.SetActive(false);
+        }
+    }
+
+    private void RestoreHiddenObjects()
+    {
+        if (_hiddenObjectStates.Count == 0)
+        {
+            return;
+        }
+
+        foreach (KeyValuePair<GameObject, bool> entry in _hiddenObjectStates)
+        {
+            if (entry.Key != null)
+            {
+                entry.Key.SetActive(entry.Value);
+            }
+        }
+
+        _hiddenObjectStates.Clear();
+    }
+
+    private bool ShouldSkipHiddenObject(GameObject target)
+    {
+        if (target == null || target == gameObject || target == panelRoot)
+        {
+            return true;
+        }
+
+        if (panelRoot == null)
+        {
+            return false;
+        }
+
+        Transform panelTransform = panelRoot.transform;
+        Transform targetTransform = target.transform;
+        return targetTransform.IsChildOf(panelTransform) || panelTransform.IsChildOf(targetTransform);
     }
 
     private bool WasTogglePressedThisFrame()

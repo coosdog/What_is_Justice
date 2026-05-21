@@ -1,43 +1,50 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(PointerClick2D))]
-public sealed class AssistantNpcObject : MonoBehaviour
+public sealed class AssistantNpcObject : ClickableInquiryObject
 {
+    [SerializeField] private AssistantCompanionManager assistantCompanionManager;
     [SerializeField] private AssistantDiscussionManager assistantDiscussionManager;
 
-    private PointerClick2D _clickable;
-
-    private void Awake()
+    protected override void Awake()
     {
-        _clickable = GetComponent<PointerClick2D>();
+        base.Awake();
+        if (assistantCompanionManager == null)
+        {
+            assistantCompanionManager = FindFirstObjectByType<AssistantCompanionManager>();
+        }
+
+        if (assistantCompanionManager == null)
+        {
+            assistantCompanionManager = gameObject.AddComponent<AssistantCompanionManager>();
+        }
+
         if (assistantDiscussionManager == null)
         {
             assistantDiscussionManager = FindFirstObjectByType<AssistantDiscussionManager>();
         }
     }
 
-    private void OnEnable()
+    protected override void OnClicked()
     {
-        if (_clickable != null)
+        if (assistantCompanionManager == null)
         {
-            _clickable.Clicked += HandleClicked;
+            assistantCompanionManager = FindFirstObjectByType<AssistantCompanionManager>();
         }
-    }
 
-    private void OnDisable()
-    {
-        if (_clickable != null)
+        if (assistantCompanionManager == null)
         {
-            _clickable.Clicked -= HandleClicked;
+            assistantCompanionManager = gameObject.AddComponent<AssistantCompanionManager>();
         }
-    }
 
-    private void HandleClicked()
-    {
         if (assistantDiscussionManager == null)
         {
             assistantDiscussionManager = FindFirstObjectByType<AssistantDiscussionManager>();
+        }
+
+        if (assistantCompanionManager != null)
+        {
+            assistantCompanionManager.StartManualTalk();
+            return;
         }
 
         assistantDiscussionManager?.StartAssistantTalk();

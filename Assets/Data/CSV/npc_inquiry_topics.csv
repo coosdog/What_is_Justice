@@ -2,3 +2,25 @@ npc_id,keyword_id,disposition,response_dialogue_ids,fallback_response_text
 npc.witness,keyword.alibi,basic,character.witness.alibi.001|character.witness.alibi.002,그 시간에는 법원 복도에 있었습니다.
 npc.witness,keyword.alibi,Tendency1,,성향 1로 보면 목격자의 말끝이 조금 흐려 보입니다.
 npc.witness,keyword.alibi,Tendency2,,성향 2로 보면 목격자가 장소보다 시간을 더 신경 쓰는 것 같습니다.
+npc.witness,keyword.alibi,Tendency3,,성향 3로 보면 목격자가 숨긴 소리와 동선을 더 의식하는 것 같습니다.
+npc.kang_minhyuk,keyword.accident,basic,character.kang_minhyuk.accident.001,
+npc.kang_minhyuk,keyword.alibi,basic,character.kang_minhyuk.alibi.001,
+npc.kang_minhyuk,keyword.kang_return,basic,character.kang_minhyuk.return.001,
+npc.han_seongmi,keyword.accident,basic,character.han_seongmi.accident.001,
+npc.han_seongmi,keyword.alibi,basic,character.han_seongmi.alibi.001,
+npc.han_seongmi,keyword.victim,basic,character.han_seongmi.victim.001,
+npc.park_sanggu,keyword.accident,basic,character.park_sanggu.accident.001,
+npc.park_sanggu,keyword.alibi,basic,character.park_sanggu.alibi.001,
+npc.park_sanggu,keyword.victim,basic,character.park_sanggu.victim.001,
+npc.yoon_taesik,keyword.accident,basic,character.yoon_taesik.accident.001,
+npc.yoon_taesik,keyword.alibi,basic,character.yoon_taesik.alibi.001,
+npc.yoon_taesik,keyword.victim,basic,character.yoon_taesik.victim.001,
+npc.choi_hyeondo,keyword.accident,basic,character.choi_hyeondo.accident.001,
+npc.choi_hyeondo,keyword.alibi,basic,character.choi_hyeondo.alibi.001,
+npc.choi_hyeondo,keyword.lodge,basic,character.choi_hyeondo.lodge.001,
+npc.seo_jia,keyword.accident,basic,character.seo_jia.accident.001,
+npc.seo_jia,keyword.alibi,basic,character.seo_jia.alibi.001,
+npc.seo_jia,keyword.kang_return,basic,character.seo_jia.return.001,
+npc.lee_sujin,keyword.accident,basic,character.lee_sujin.accident.001,
+npc.lee_sujin,keyword.alibi,basic,character.lee_sujin.alibi.001,
+npc.lee_sujin,keyword.kang_return,basic,character.lee_sujin.return.001,
