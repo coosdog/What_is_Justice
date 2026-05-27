@@ -7,3 +7,20 @@ assistant.alibi_note.basic,EvidenceAcquired,evidence.alibi_note,basic,,그 메�
 assistant.alibi_note.tendency1,EvidenceAcquired,evidence.alibi_note,Tendency1,,그 메모, 그냥 흘린 건 아닌 것 같은데요. 제가 훔쳤다면 저렇게 대놓고 두진 않았을 거예요.
 assistant.alibi_note.tendency2,EvidenceAcquired,evidence.alibi_note,Tendency2,,알리바이라... 보통 그런 말은 빠져나갈 구멍이 필요할 때 먼저 준비하죠.
 assistant.alibi_note.tendency3,EvidenceAcquired,evidence.alibi_note,Tendency3,,종이 냄새가 새것은 아니에요. 오래 숨겨뒀다가 꺼낸 물건 같아요.
+assistant.medicine.basic,EvidenceAcquired,evidence.kang_private_medicine,basic,,약통은 자기 물건처럼 보이는데 안쪽 알약은 얌전히 같은 편이 아닌 것 같네요.
+assistant.medicine.tendency1,EvidenceAcquired,evidence.kang_private_medicine,Tendency1,,라벨하고 알약 색이 안 맞아요. 누가 통을 바꾼 게 아니라 안쪽만 건드린 것 같아요.
+assistant.knife.basic,EvidenceAcquired,evidence.single_knife,basic,,칼은 하나인데 흔적은 하나 같지 않아요. 이상하죠. 너무 깔끔한데 너무 지저분해요.
+assistant.choi.basic,EvidenceAcquired,evidence.choi_planted_clues,basic,,전부 최현도 씨를 가리키네요. 이렇게 친절한 증거는 보통 누가 보여주고 싶어서 놓은 거예요.
+assistant.seo.basic,EvidenceAcquired,evidence.seo_production_note,basic,,PD라는 사람은 화면 밖 일정까지 알고 있잖아요. 그게 이번엔 꽤 위험한 정보였던 것 같고요.
+assistant.yoon.basic,EvidenceAcquired,evidence.yoon_tool_trace,basic,,칼을 잘 아는 사람하고 몸을 잘 아는 사람. 둘 다 같은 사람일 수도 있겠네요.
+assistant.han.basic,EvidenceAcquired,evidence.han_sleeping_pills,basic,,한성미 씨 약은 그냥 생활의 흔적일 수도 있어요. 근데 이번 사건에서 약이 너무 조용히 중요하네요.
+assistant.park.basic,EvidenceAcquired,evidence.park_door_mark,basic,,문가의 자국은 공구처럼 보이려고 애쓴 흔적 같아요. 힘으로 남긴 자국은 숨기기 어렵거든요.
+assistant.lee.basic,EvidenceAcquired,evidence.lee_room_assignment,basic,,방 배정이 별거 아닌 것 같죠? 근데 길을 아는 사람이 방을 나누면, 사람도 같이 나누는 거예요.
+assistant.keyword.medicine,KeywordUnlocked,keyword.medicine,basic,,바뀐 약이라면 누가 먹였는지가 아니라 누가 바꿀 수 있었는지를 봐야겠네요.
+assistant.keyword.weapon,KeywordUnlocked,keyword.weapon,basic,,흉기가 하나라고 해서 손도 하나였다는 뜻은 아니죠.
+assistant.keyword.wound,KeywordUnlocked,keyword.wound,basic,,상처가 제각각이면 사람도 제각각일 수 있어요. 그 칼을 누가 어떻게 쥐었는지 봐요.
+assistant.keyword.choi,KeywordUnlocked,keyword.choi_suspect,basic,,최현도 씨가 수상한 건 맞아요. 근데 너무 수상하면 그건 또 다른 문제예요.
+assistant.keyword.planted,KeywordUnlocked,keyword.planted_evidence,basic,,누가 증거를 숨긴 게 아니라 보여주려고 둔 것 같아요. 그럼 보여주고 싶은 상대가 있었겠죠.
+assistant.keyword.documentary,KeywordUnlocked,keyword.documentary,basic,,다큐는 사람을 모으기 좋은 핑계예요. 카메라가 있으면 다들 역할을 연기하니까요.
+assistant.keyword.lodge,KeywordUnlocked,keyword.lodge,basic,,산장은 길을 아는 사람이 유리해요. 눈이 오면 더 그렇고요.
+assistant.keyword.alibi,KeywordUnlocked,keyword.alibi,basic,,알리바이는 없어서 수상한 게 아니라 너무 서로 맞아도 수상해요.

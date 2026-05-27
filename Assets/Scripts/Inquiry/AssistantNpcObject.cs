@@ -43,8 +43,10 @@ public sealed class AssistantNpcObject : ClickableInquiryObject
 
         if (assistantCompanionManager != null)
         {
-            assistantCompanionManager.StartManualTalk();
-            return;
+            if (assistantCompanionManager.StartManualTalk())
+            {
+                return;
+            }
         }
 
         assistantDiscussionManager?.StartAssistantTalk();

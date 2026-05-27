@@ -13,11 +13,15 @@ MonoBehaviour:
   m_Name: DeskClueData
   m_EditorClassIdentifier: Assembly-CSharp::ClueData
   clueId: desk.office
-  displayName: "\uCC45\uC0C1"
+  displayName: "\uAD00\uB9AC \uAE30\uB85D"
   firstInvestigationDialogueIds:
   - object.desk.office.first
   alreadyInvestigatedDialogueIds:
   - object.desk.office.repeat
-  firstInvestigationText: 
+  firstInvestigationText: "\uC0B0\uC7A5 \uAD00\uB9AC \uAE30\uB85D\uC774 \uCD5C\uD604\uB3C4\uB97C \uAC00\uB9AC\uD0A4\uACE0 \uC788\uB2E4."
   alreadyInvestigatedText: "\uC774\uBBF8 \uC870\uC0AC\uD55C \uB300\uC0C1\uC774\uB2E4."
-  grantsClueItem: 0
+  dispositionOverrides: []
+  rewardEvidence: {fileID: 0}
+  rewardEvidenceId: evidence.choi_planted_clues
+  nextBackground: {fileID: 0}
+  runOutcomesOnlyOnFirstInvestigation: 1

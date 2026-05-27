@@ -13,12 +13,15 @@ MonoBehaviour:
   m_Name: BoxClueData
   m_EditorClassIdentifier: Assembly-CSharp::ClueData
   clueId: box.office
-  displayName: "\uC0C1\uC790"
+  displayName: "\uD749\uAE30 \uC0C1\uC790"
   firstInvestigationDialogueIds:
   - object.box.office.first
   alreadyInvestigatedDialogueIds:
   - object.box.office.repeat
-  firstInvestigationText: "\uC0C1\uC790 \uC548\uC5D0\uB294 \uB0A1\uC740 \uC5F4\uC1E0
-    \uD558\uB098\uAC00 \uB4E4\uC5B4 \uC788\uB2E4."
+  firstInvestigationText: "\uC0C1\uC790 \uC548\uC5D0\uB294 \uCC3D\uACE0\uC5D0\uC11C \uB098\uC628 \uCE7C\uACFC \uB0A1\uC740 \uC7A5\uAC11\uC774 \uB4E4\uC5B4 \uC788\uB2E4."
   alreadyInvestigatedText: "\uC774\uBBF8 \uD655\uC778\uD55C \uC0C1\uC790\uB2E4."
-  grantsClueItem: 0
+  dispositionOverrides: []
+  rewardEvidence: {fileID: 0}
+  rewardEvidenceId: evidence.single_knife
+  nextBackground: {fileID: 0}
+  runOutcomesOnlyOnFirstInvestigation: 1

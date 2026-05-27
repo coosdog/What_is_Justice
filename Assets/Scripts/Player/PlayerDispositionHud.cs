@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed class PlayerDispositionHud : MonoBehaviour
 {
-    private const string TmpPrewarmText = "\uD604\uC7AC \uC131\uD5A5 \uAE30\uBCF8 \uC131\uD5A5 1 \uC131\uD5A5 2 \uC131\uD5A5 3";
+    private const string TmpPrewarmText = "관찰모드 기본 관찰 예리한 시야 미세한 청각 침묵의 응시";
 
     [SerializeField] private PlayerDispositionManager dispositionManager;
     [SerializeField] private TMP_Text labelText;
@@ -55,7 +55,7 @@ public sealed class PlayerDispositionHud : MonoBehaviour
             return;
         }
 
-        string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "\uAE30\uBCF8";
-        labelText.text = $"\uC131\uD5A5: {disposition}  [1/2/3/4]";
+        string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "기본 관찰";
+        labelText.text = $"관찰모드: {disposition}  [1 기본/2 시야/3 청각/4 응시]";
     }
 }

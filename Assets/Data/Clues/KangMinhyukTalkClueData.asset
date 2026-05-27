@@ -16,10 +16,10 @@ MonoBehaviour:
   displayName: "강민혁"
   firstInvestigationDialogueIds: []
   alreadyInvestigatedDialogueIds: []
-  firstInvestigationText: "지금은 공식 인터뷰 외에는 길게 말하고 싶지 않습니다."
+  firstInvestigationText: "지금은 공식 인터뷰 외에는 길게 말하고 싶지 않습니다. 방으로 돌아가 쉬어야 할 것 같군요."
   alreadyInvestigatedText: "아까 말한 것 이상은 없습니다."
   dispositionOverrides: []
   rewardEvidence: {fileID: 0}
-  rewardEvidenceId: 
+  rewardEvidenceId: evidence.kang_private_medicine
   nextBackground: {fileID: 0}
   runOutcomesOnlyOnFirstInvestigation: 1

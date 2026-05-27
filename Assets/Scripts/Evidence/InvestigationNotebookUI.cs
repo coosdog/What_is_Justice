@@ -18,7 +18,8 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         Assistant
     }
 
-    private const string TmpPrewarmText = "\uC218\uC0AC\uB178\uD2B8 \uB2E8\uC11C NPC \uB300\uD654 \uAE30\uB85D \uC0AC\uC0C9\uD558\uAE30 \uC870\uC218\uC640 \uB300\uD654\uD558\uAE30";
+    private const string TmpPrewarmText = "수사노트 단서 NPC 대화 기록 단서연결 가설 카드 사색에 잠기기 조수의 정리 기본 관찰 예리한 시야 미세한 청각 침묵의 응시";
+    private const int BoardVisibleNodeCount = 16;
 
     [Header("Scene References")]
     [SerializeField] private TMP_Text titleText;
@@ -39,6 +40,8 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     [SerializeField] private DialogueLog dialogueLog;
     [SerializeField] private NpcProfileRegistry npcProfileRegistry;
     [SerializeField] private AssistantDiscussionManager assistantDiscussionManager;
+    [SerializeField] private PlayerReflectionManager playerReflectionManager;
+    [SerializeField] private InvestigationBoardManager investigationBoardManager;
     [SerializeField] private PlayerDispositionManager dispositionManager;
 
     [Header("Input")]
@@ -50,6 +53,10 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private NotebookTab _currentTab = NotebookTab.Evidence;
     private readonly Dictionary<GameObject, bool> _hiddenObjectStates = new();
+    private int _firstBoardNodeIndex;
+    private int _secondBoardNodeIndex = 1;
+    private int _boardScrollIndex;
+    private string _lastBoardResult = "연결할 단서 두 개를 고르자.";
 
     protected override void Awake()
     {
@@ -80,6 +87,11 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         {
             dispositionManager.DispositionChanged += HandleDispositionChanged;
         }
+
+        if (investigationBoardManager != null)
+        {
+            investigationBoardManager.Changed += RefreshIfVisible;
+        }
     }
 
     private void OnDisable()
@@ -102,6 +114,11 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             dispositionManager.DispositionChanged -= HandleDispositionChanged;
         }
 
+        if (investigationBoardManager != null)
+        {
+            investigationBoardManager.Changed -= RefreshIfVisible;
+        }
+
         RestoreHiddenObjects();
     }
 
@@ -110,6 +127,11 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         if (toggleWithKeyboard && WasTogglePressedThisFrame())
         {
             Toggle();
+        }
+
+        if (IsVisible && _currentTab == NotebookTab.Reflection)
+        {
+            HandleBoardInput();
         }
     }
 
@@ -149,7 +171,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         if (dispositionText != null)
         {
             string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "기본";
-            dispositionText.text = $"현재 성향: {disposition}    1 기본 / 2 성향 1 / 3 성향 2 / 4 성향 3";
+            dispositionText.text = $"관찰모드: {disposition}    1 기본 관찰 / 2 예리한 시야 / 3 미세한 청각 / 4 침묵의 응시";
         }
 
         switch (_currentTab)
@@ -226,23 +248,21 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void RenderReflectionTab()
     {
-        SetTitles("사색하기", "현재 정리");
-        string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "기본";
-        string body = assistantDiscussionManager != null
-            ? assistantDiscussionManager.BuildReflectionText()
-            : $"{disposition} 성향으로 지금까지 얻은 단서를 정리합니다.";
-
-        SetBodies("플레이어가 혼자 단서를 되짚어보는 영역입니다.", body);
+        SetTitles("단서 연결", "가설 카드");
+        SetBodies(BuildConnectionBoardText(), BuildHypothesisText());
     }
 
     private void RenderAssistantTab()
     {
-        SetTitles("조수와 대화하기", "조수의 정리");
-        string body = assistantDiscussionManager != null
+        SetTitles("사색에 잠기기", "조수의 정리");
+        string reflectionBody = playerReflectionManager != null
+            ? playerReflectionManager.BuildReflectionText()
+            : "사색 기능이 아직 연결되지 않았습니다.";
+        string assistantBody = assistantDiscussionManager != null
             ? assistantDiscussionManager.BuildAssistantSummary()
             : "조수가 아직 연결되지 않았습니다.";
 
-        SetBodies("조수 NPC와 함께 추론을 맞춰가는 영역입니다.", body);
+        SetBodies(reflectionBody, assistantBody);
     }
 
     private string BuildEvidenceText()
@@ -284,6 +304,60 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         if (entryCount == 0)
         {
             builder.AppendLine("아직 획득한 단서가 없습니다.");
+        }
+
+        return builder.ToString();
+    }
+
+    private string BuildConnectionBoardText()
+    {
+        if (investigationBoardManager == null || investigationBoardManager.Nodes.Count == 0)
+        {
+            return "아직 연결할 단서가 없습니다. 조사나 탐문으로 단서, 키워드, 발언을 모아야 합니다.";
+        }
+
+        ClampBoardSelection();
+        ClampBoardScroll();
+
+        StringBuilder builder = new();
+        builder.AppendLine("[연결 후보]");
+        int nodeCount = investigationBoardManager.Nodes.Count;
+        int visibleCount = Mathf.Min(BoardVisibleNodeCount, nodeCount);
+        int endIndex = Mathf.Min(_boardScrollIndex + visibleCount, nodeCount);
+        builder.AppendLine($"{_boardScrollIndex + 1}-{endIndex} / {nodeCount}");
+
+        for (int i = _boardScrollIndex; i < endIndex; i++)
+        {
+            InvestigationNode node = investigationBoardManager.Nodes[i];
+            string marker = i == _firstBoardNodeIndex ? "A" : i == _secondBoardNodeIndex ? "B" : " ";
+            builder.AppendLine($"{marker} {i + 1}. {FormatNodeType(node.Type)} {node.DisplayName}");
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("[선택]");
+        builder.AppendLine($"A: {GetSelectedNodeName(_firstBoardNodeIndex)}");
+        builder.AppendLine($"B: {GetSelectedNodeName(_secondBoardNodeIndex)}");
+        builder.AppendLine();
+        builder.AppendLine(_lastBoardResult);
+        builder.AppendLine();
+        builder.AppendLine("휠/↑↓: 목록 이동");
+        builder.AppendLine("Q/E: A 변경  A/D: B 변경  Enter: 연결");
+        return builder.ToString();
+    }
+
+    private string BuildHypothesisText()
+    {
+        if (investigationBoardManager == null || investigationBoardManager.Hypotheses.Count == 0)
+        {
+            return "아직 생성된 가설 카드가 없습니다. 서로 관련 있어 보이는 단서 두 개를 연결해보세요.";
+        }
+
+        StringBuilder builder = new();
+        foreach (InvestigationHypothesis hypothesis in investigationBoardManager.Hypotheses)
+        {
+            builder.AppendLine($"[{hypothesis.Title}]");
+            AppendIfNotEmpty(builder, hypothesis.Description);
+            builder.AppendLine();
         }
 
         return builder.ToString();
@@ -335,6 +409,26 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         if (assistantDiscussionManager == null)
         {
             assistantDiscussionManager = FindFirstObjectByType<AssistantDiscussionManager>();
+        }
+
+        if (playerReflectionManager == null)
+        {
+            playerReflectionManager = FindFirstObjectByType<PlayerReflectionManager>();
+        }
+
+        if (playerReflectionManager == null)
+        {
+            playerReflectionManager = gameObject.AddComponent<PlayerReflectionManager>();
+        }
+
+        if (investigationBoardManager == null)
+        {
+            investigationBoardManager = FindFirstObjectByType<InvestigationBoardManager>();
+        }
+
+        if (investigationBoardManager == null)
+        {
+            investigationBoardManager = gameObject.AddComponent<InvestigationBoardManager>();
         }
 
         if (dispositionManager == null)
@@ -402,6 +496,145 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         }
     }
 
+    private void HandleBoardInput()
+    {
+        if (investigationBoardManager == null || investigationBoardManager.Nodes.Count == 0)
+        {
+            return;
+        }
+
+        bool changed = false;
+        int scrollDelta = GetBoardScrollDelta();
+        if (scrollDelta != 0)
+        {
+            _boardScrollIndex -= scrollDelta;
+            changed = true;
+        }
+        else if (WasBoardKeyPressed(BoardKey.PreviousFirst))
+        {
+            _firstBoardNodeIndex--;
+            EnsureBoardSelectionVisible(_firstBoardNodeIndex);
+            changed = true;
+        }
+        else if (WasBoardKeyPressed(BoardKey.NextFirst))
+        {
+            _firstBoardNodeIndex++;
+            EnsureBoardSelectionVisible(_firstBoardNodeIndex);
+            changed = true;
+        }
+        else if (WasBoardKeyPressed(BoardKey.PreviousSecond))
+        {
+            _secondBoardNodeIndex--;
+            EnsureBoardSelectionVisible(_secondBoardNodeIndex);
+            changed = true;
+        }
+        else if (WasBoardKeyPressed(BoardKey.NextSecond))
+        {
+            _secondBoardNodeIndex++;
+            EnsureBoardSelectionVisible(_secondBoardNodeIndex);
+            changed = true;
+        }
+        else if (WasBoardKeyPressed(BoardKey.Connect))
+        {
+            ClampBoardSelection();
+            InvestigationNode first = investigationBoardManager.Nodes[_firstBoardNodeIndex];
+            InvestigationNode second = investigationBoardManager.Nodes[_secondBoardNodeIndex];
+            LinkResult result = investigationBoardManager.TryConnect(first.NodeId, second.NodeId);
+            _lastBoardResult = result.Message;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            ClampBoardSelection();
+            ClampBoardScroll();
+            Refresh();
+        }
+    }
+
+    private void ClampBoardSelection()
+    {
+        int count = investigationBoardManager != null ? investigationBoardManager.Nodes.Count : 0;
+        if (count <= 0)
+        {
+            _firstBoardNodeIndex = 0;
+            _secondBoardNodeIndex = 0;
+            _boardScrollIndex = 0;
+            return;
+        }
+
+        _firstBoardNodeIndex = WrapIndex(_firstBoardNodeIndex, count);
+        _secondBoardNodeIndex = WrapIndex(_secondBoardNodeIndex, count);
+
+        if (count > 1 && _firstBoardNodeIndex == _secondBoardNodeIndex)
+        {
+            _secondBoardNodeIndex = WrapIndex(_secondBoardNodeIndex + 1, count);
+        }
+    }
+
+    private void ClampBoardScroll()
+    {
+        int count = investigationBoardManager != null ? investigationBoardManager.Nodes.Count : 0;
+        int maxScrollIndex = Mathf.Max(0, count - BoardVisibleNodeCount);
+        _boardScrollIndex = Mathf.Clamp(_boardScrollIndex, 0, maxScrollIndex);
+    }
+
+    private void EnsureBoardSelectionVisible(int index)
+    {
+        int count = investigationBoardManager != null ? investigationBoardManager.Nodes.Count : 0;
+        if (count <= 0)
+        {
+            _boardScrollIndex = 0;
+            return;
+        }
+
+        index = WrapIndex(index, count);
+        if (index < _boardScrollIndex)
+        {
+            _boardScrollIndex = index;
+        }
+        else if (index >= _boardScrollIndex + BoardVisibleNodeCount)
+        {
+            _boardScrollIndex = index - BoardVisibleNodeCount + 1;
+        }
+    }
+
+    private string GetSelectedNodeName(int index)
+    {
+        if (investigationBoardManager == null || investigationBoardManager.Nodes.Count == 0)
+        {
+            return "없음";
+        }
+
+        index = WrapIndex(index, investigationBoardManager.Nodes.Count);
+        InvestigationNode node = investigationBoardManager.Nodes[index];
+        return $"{FormatNodeType(node.Type)} {node.DisplayName}";
+    }
+
+    private static int WrapIndex(int index, int count)
+    {
+        if (count <= 0)
+        {
+            return 0;
+        }
+
+        int wrapped = index % count;
+        return wrapped < 0 ? wrapped + count : wrapped;
+    }
+
+    private static string FormatNodeType(InvestigationNodeType type)
+    {
+        return type switch
+        {
+            InvestigationNodeType.Evidence => "[단서]",
+            InvestigationNodeType.Keyword => "[키워드]",
+            InvestigationNodeType.Dialogue => "[발언]",
+            InvestigationNodeType.Observation => "[관찰]",
+            InvestigationNodeType.Hypothesis => "[가설]",
+            _ => "[정보]"
+        };
+    }
+
     private void HideOverlappedObjects()
     {
         if (hideWhileOpen == null || hideWhileOpen.Length == 0)
@@ -463,6 +696,95 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         return keyboard != null && keyboard.nKey.wasPressedThisFrame;
 #elif ENABLE_LEGACY_INPUT_MANAGER
         return Input.GetKeyDown(legacyToggleKey);
+#else
+        return false;
+#endif
+    }
+
+    private enum BoardKey
+    {
+        PreviousFirst,
+        NextFirst,
+        PreviousSecond,
+        NextSecond,
+        Connect,
+        ScrollUp,
+        ScrollDown
+    }
+
+    private static int GetBoardScrollDelta()
+    {
+        int delta = 0;
+#if ENABLE_INPUT_SYSTEM
+        Mouse mouse = Mouse.current;
+        if (mouse != null)
+        {
+            float scrollY = mouse.scroll.ReadValue().y;
+            if (scrollY > 0f)
+            {
+                delta++;
+            }
+            else if (scrollY < 0f)
+            {
+                delta--;
+            }
+        }
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        float scrollY = Input.mouseScrollDelta.y;
+        if (scrollY > 0f)
+        {
+            delta++;
+        }
+        else if (scrollY < 0f)
+        {
+            delta--;
+        }
+#endif
+
+        if (WasBoardKeyPressed(BoardKey.ScrollUp))
+        {
+            delta++;
+        }
+        else if (WasBoardKeyPressed(BoardKey.ScrollDown))
+        {
+            delta--;
+        }
+
+        return delta;
+    }
+
+    private static bool WasBoardKeyPressed(BoardKey key)
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+        {
+            return false;
+        }
+
+        return key switch
+        {
+            BoardKey.PreviousFirst => keyboard.qKey.wasPressedThisFrame,
+            BoardKey.NextFirst => keyboard.eKey.wasPressedThisFrame,
+            BoardKey.PreviousSecond => keyboard.aKey.wasPressedThisFrame,
+            BoardKey.NextSecond => keyboard.dKey.wasPressedThisFrame,
+            BoardKey.Connect => keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame,
+            BoardKey.ScrollUp => keyboard.upArrowKey.wasPressedThisFrame,
+            BoardKey.ScrollDown => keyboard.downArrowKey.wasPressedThisFrame,
+            _ => false
+        };
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        return key switch
+        {
+            BoardKey.PreviousFirst => Input.GetKeyDown(KeyCode.Q),
+            BoardKey.NextFirst => Input.GetKeyDown(KeyCode.E),
+            BoardKey.PreviousSecond => Input.GetKeyDown(KeyCode.A),
+            BoardKey.NextSecond => Input.GetKeyDown(KeyCode.D),
+            BoardKey.Connect => Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter),
+            BoardKey.ScrollUp => Input.GetKeyDown(KeyCode.UpArrow),
+            BoardKey.ScrollDown => Input.GetKeyDown(KeyCode.DownArrow),
+            _ => false
+        };
 #else
         return false;
 #endif

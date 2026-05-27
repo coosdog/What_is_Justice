@@ -9,8 +9,10 @@ public sealed class AssistantCompanionManager : MonoBehaviour
     [SerializeField] private InvestigationUI investigationUI;
     [SerializeField] private EvidenceInventory evidenceInventory;
     [SerializeField] private PlayerDispositionManager dispositionManager;
-    [SerializeField] private bool reactToEvidenceAcquired = true;
-    [SerializeField] private bool reactToKeywordUnlocked;
+    [SerializeField] private bool rememberEvidenceAcquired = true;
+    [SerializeField] private bool rememberKeywordUnlocked = true;
+
+    private readonly List<PendingAssistantDiscovery> _pendingDiscoveries = new();
 
     private void Awake()
     {
@@ -41,43 +43,54 @@ public sealed class AssistantCompanionManager : MonoBehaviour
         }
     }
 
-    public void StartManualTalk()
+    public bool StartManualTalk()
     {
-        ShowAssistantDialogue(AssistantDialogueTrigger.ManualTalk, "none");
+        if (TryShowPendingDiscovery())
+        {
+            return true;
+        }
+
+        return ShowAssistantDialogue(AssistantDialogueTrigger.ManualTalk, "none");
     }
 
-    public void ReactToEvidence(string evidenceId)
+    public bool ReactToEvidence(string evidenceId)
     {
-        ShowAssistantDialogue(AssistantDialogueTrigger.EvidenceAcquired, evidenceId);
+        return ShowAssistantDialogue(AssistantDialogueTrigger.EvidenceAcquired, evidenceId);
     }
 
-    public void ReactToKeyword(string keywordId)
+    public bool ReactToKeyword(string keywordId)
     {
-        ShowAssistantDialogue(AssistantDialogueTrigger.KeywordUnlocked, keywordId);
+        return ShowAssistantDialogue(AssistantDialogueTrigger.KeywordUnlocked, keywordId);
     }
 
-    private void ShowAssistantDialogue(AssistantDialogueTrigger triggerType, string conditionId)
+    private bool ShowAssistantDialogue(AssistantDialogueTrigger triggerType, string conditionId)
     {
         ResolveReferences();
 
         if (investigationUI == null || assistantDialogueDatabase == null)
         {
-            return;
+            return false;
         }
 
         if (investigationUI.IsVisible)
         {
-            return;
+            return false;
         }
 
         PlayerDisposition disposition = dispositionManager != null ? dispositionManager.CurrentDisposition : PlayerDisposition.Basic;
         if (!assistantDialogueDatabase.TryGetDialogue(triggerType, conditionId, disposition, out CsvAssistantDialogueRecord record))
         {
-            return;
+            return false;
         }
 
         List<DialogueLine> lines = ResolveDialogueLines(record.ResponseDialogueIds, assistantName, record.FallbackText);
+        if (lines.Count == 0)
+        {
+            return false;
+        }
+
         investigationUI.ShowSequence(lines);
+        return true;
     }
 
     private List<DialogueLine> ResolveDialogueLines(IEnumerable<string> dialogueIds, string fallbackSpeaker, string fallbackText)
@@ -91,7 +104,7 @@ public sealed class AssistantCompanionManager : MonoBehaviour
                 if (dialogueDatabase != null && dialogueDatabase.TryGetEntry(dialogueId, out DialogueEntry entry))
                 {
                     string speaker = string.IsNullOrWhiteSpace(entry.Speaker) ? fallbackSpeaker : entry.Speaker;
-                    lines.Add(new DialogueLine(speaker, entry.Text));
+                    lines.Add(new DialogueLine(speaker, entry.Text, entry.PortraitKey, entry.Emotion));
                 }
             }
         }
@@ -106,34 +119,95 @@ public sealed class AssistantCompanionManager : MonoBehaviour
 
     private void HandleEvidenceAdded(EvidenceData evidence)
     {
-        if (reactToEvidenceAcquired && evidence != null)
+        if (rememberEvidenceAcquired && evidence != null)
         {
-            ReactToEvidence(evidence.EvidenceId);
+            RememberDiscovery(AssistantDialogueTrigger.EvidenceAcquired, evidence.EvidenceId);
         }
     }
 
     private void HandleCsvEvidenceAdded(CsvEvidenceRecord evidence)
     {
-        if (reactToEvidenceAcquired && evidence != null)
+        if (rememberEvidenceAcquired && evidence != null)
         {
-            ReactToEvidence(evidence.EvidenceId);
+            RememberDiscovery(AssistantDialogueTrigger.EvidenceAcquired, evidence.EvidenceId);
         }
     }
 
     private void HandleKeywordAdded(KeywordData keyword)
     {
-        if (reactToKeywordUnlocked && keyword != null)
+        if (rememberKeywordUnlocked && keyword != null)
         {
-            ReactToKeyword(keyword.KeywordId);
+            RememberDiscovery(AssistantDialogueTrigger.KeywordUnlocked, keyword.KeywordId);
         }
     }
 
     private void HandleCsvKeywordAdded(CsvKeywordRecord keyword)
     {
-        if (reactToKeywordUnlocked && keyword != null)
+        if (rememberKeywordUnlocked && keyword != null)
         {
-            ReactToKeyword(keyword.KeywordId);
+            RememberDiscovery(AssistantDialogueTrigger.KeywordUnlocked, keyword.KeywordId);
         }
+    }
+
+    private void RememberDiscovery(AssistantDialogueTrigger triggerType, string conditionId)
+    {
+        if (string.IsNullOrWhiteSpace(conditionId))
+        {
+            return;
+        }
+
+        for (int i = 0; i < _pendingDiscoveries.Count; i++)
+        {
+            PendingAssistantDiscovery pending = _pendingDiscoveries[i];
+            if (pending.TriggerType == triggerType && pending.ConditionId == conditionId)
+            {
+                return;
+            }
+        }
+
+        _pendingDiscoveries.Add(new PendingAssistantDiscovery(triggerType, conditionId));
+    }
+
+    private bool TryShowPendingDiscovery()
+    {
+        ResolveReferences();
+
+        if (investigationUI == null || assistantDialogueDatabase == null || investigationUI.IsVisible)
+        {
+            return false;
+        }
+
+        PlayerDisposition disposition = dispositionManager != null ? dispositionManager.CurrentDisposition : PlayerDisposition.Basic;
+        if (TryShowPendingDiscoveryOfType(AssistantDialogueTrigger.KeywordUnlocked, disposition))
+        {
+            return true;
+        }
+
+        return TryShowPendingDiscoveryOfType(AssistantDialogueTrigger.EvidenceAcquired, disposition);
+    }
+
+    private bool TryShowPendingDiscoveryOfType(AssistantDialogueTrigger triggerType, PlayerDisposition disposition)
+    {
+        for (int i = _pendingDiscoveries.Count - 1; i >= 0; i--)
+        {
+            PendingAssistantDiscovery pending = _pendingDiscoveries[i];
+            if (pending.TriggerType != triggerType)
+            {
+                continue;
+            }
+
+            if (!assistantDialogueDatabase.TryGetDialogue(pending.TriggerType, pending.ConditionId, disposition, out CsvAssistantDialogueRecord record))
+            {
+                continue;
+            }
+
+            _pendingDiscoveries.RemoveAt(i);
+            List<DialogueLine> lines = ResolveDialogueLines(record.ResponseDialogueIds, assistantName, record.FallbackText);
+            investigationUI.ShowSequence(lines);
+            return true;
+        }
+
+        return false;
     }
 
     private void ResolveReferences()
@@ -167,5 +241,17 @@ public sealed class AssistantCompanionManager : MonoBehaviour
         {
             dispositionManager = FindFirstObjectByType<PlayerDispositionManager>();
         }
+    }
+
+    private readonly struct PendingAssistantDiscovery
+    {
+        public PendingAssistantDiscovery(AssistantDialogueTrigger triggerType, string conditionId)
+        {
+            TriggerType = triggerType;
+            ConditionId = conditionId;
+        }
+
+        public AssistantDialogueTrigger TriggerType { get; }
+        public string ConditionId { get; }
     }
 }

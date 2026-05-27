@@ -16,10 +16,10 @@ MonoBehaviour:
   displayName: "최현도"
   firstInvestigationDialogueIds: []
   alreadyInvestigatedDialogueIds: []
-  firstInvestigationText: "이 산장에서는 오래 머무를수록 말보다 침묵이 많아진다네."
+  firstInvestigationText: "이 산장에서는 오래 머무를수록 말보다 침묵이 많아진다네. 열쇠와 창고 기록은 내가 관리하고 있지."
   alreadyInvestigatedText: "노인이 같은 말을 두 번 하게 만들지는 말게."
   dispositionOverrides: []
   rewardEvidence: {fileID: 0}
-  rewardEvidenceId: 
+  rewardEvidenceId: evidence.choi_planted_clues
   nextBackground: {fileID: 0}
   runOutcomesOnlyOnFirstInvestigation: 1

@@ -53,10 +53,34 @@ public sealed class PlayerDispositionManager : MonoBehaviour
     {
         return currentDisposition switch
         {
-            PlayerDisposition.Tendency1 => "\uC131\uD5A5 1",
-            PlayerDisposition.Tendency2 => "\uC131\uD5A5 2",
-            PlayerDisposition.Tendency3 => "\uC131\uD5A5 3",
-            _ => "\uAE30\uBCF8"
+            PlayerDisposition.Tendency1 => "예리한 시야",
+            PlayerDisposition.Tendency2 => "미세한 청각",
+            PlayerDisposition.Tendency3 => "침묵의 응시",
+            _ => "기본 관찰"
+        };
+    }
+
+    public static bool IsInvestigationMode(PlayerDisposition disposition)
+    {
+        return disposition == PlayerDisposition.Basic ||
+               disposition == PlayerDisposition.Tendency1;
+    }
+
+    public static bool IsInquiryMode(PlayerDisposition disposition)
+    {
+        return disposition == PlayerDisposition.Basic ||
+               disposition == PlayerDisposition.Tendency2 ||
+               disposition == PlayerDisposition.Tendency3;
+    }
+
+    public static string GetDisplayName(PlayerDisposition disposition)
+    {
+        return disposition switch
+        {
+            PlayerDisposition.Tendency1 => "예리한 시야",
+            PlayerDisposition.Tendency2 => "미세한 청각",
+            PlayerDisposition.Tendency3 => "침묵의 응시",
+            _ => "기본 관찰"
         };
     }
 

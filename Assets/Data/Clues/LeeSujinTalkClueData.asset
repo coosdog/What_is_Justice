@@ -16,10 +16,10 @@ MonoBehaviour:
   displayName: "이수진"
   firstInvestigationDialogueIds: []
   alreadyInvestigatedDialogueIds: []
-  firstInvestigationText: "필요한 안내가 있으면 말씀해주세요. 제가 아는 선에서는 도와드릴게요."
+  firstInvestigationText: "필요한 안내가 있으면 말씀해주세요. 방 배정은 제가 도왔고, 눈 때문에 안전한 복도 위주로 안내했어요."
   alreadyInvestigatedText: "안내해드릴 수 있는 건 방금 말씀드린 정도예요."
   dispositionOverrides: []
   rewardEvidence: {fileID: 0}
-  rewardEvidenceId: 
+  rewardEvidenceId: evidence.lee_room_assignment
   nextBackground: {fileID: 0}
   runOutcomesOnlyOnFirstInvestigation: 1

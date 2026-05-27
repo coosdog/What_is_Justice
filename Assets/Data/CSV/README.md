@@ -85,19 +85,25 @@ First Investigation Dialogue Id = object.desk.office.first
 Already Investigated Dialogue Id = object.desk.office.repeat
 ```
 
-## 성향별 차이
+## 관찰모드별 차이
 
-플레이어 성향은 `Basic`, `Tendency1`, `Tendency2` 세 값으로 구분합니다.
+플레이어 관찰모드는 내부 값으로 `Basic`, `Tendency1`, `Tendency2`, `Tendency3`를 사용합니다.
 
-- 사물 조사 대사는 `ClueData`의 `Disposition Overrides`에 성향별 대사 ID나 fallback 문장을 넣어 바꿀 수 있습니다.
-- NPC 탐문 CSV는 `npc_inquiry_topics.csv`에 선택 컬럼 `disposition`을 추가하면 성향별 응답을 분리할 수 있습니다.
-- `disposition`이 비어 있거나 `basic`이면 기본 응답으로 쓰이고, `Tendency1`, `Tendency2` 행이 있으면 현재 성향에 맞는 응답이 우선됩니다.
+- `Basic`: 기본 관찰. 일반 조사와 기본 탐문에 사용합니다.
+- `Tendency1`: 예리한 시야. 조사 중 숨은 물리 단서를 발견하는 모드입니다.
+- `Tendency2`: 미세한 청각. 탐문 중 말끝, 호흡, 망설임을 읽는 모드입니다.
+- `Tendency3`: 침묵의 응시. 탐문 중 압박과 회피 반응을 읽는 모드입니다.
+
+- 사물 조사 대사는 `ClueData`의 `Disposition Overrides`에 관찰모드별 대사 ID나 fallback 문장을 넣어 바꿀 수 있습니다.
+- NPC 탐문 CSV는 `npc_inquiry_topics.csv`에 선택 컬럼 `disposition`을 추가하면 관찰모드별 응답을 분리할 수 있습니다.
+- `disposition`이 비어 있거나 `basic`이면 기본 응답으로 쓰이고, `Tendency2`, `Tendency3` 행이 있으면 탐문 중 현재 관찰모드에 맞는 응답이 우선됩니다.
+- 탐문에서 `Tendency1`은 부적합 모드로 처리됩니다. 조사에서 `Tendency2`, `Tendency3`도 부적합 모드로 처리됩니다.
 
 예시:
 
 ```csv
 npc_id,keyword_id,disposition,response_dialogue_ids,fallback_response_text
 witness,keyword.alibi,basic,npc.witness.alibi.basic,평범한 반응입니다.
-witness,keyword.alibi,Tendency1,npc.witness.alibi.t1,성향 1에서 더 의심스럽게 받아들입니다.
-witness,keyword.alibi,Tendency2,npc.witness.alibi.t2,성향 2에서 다른 단서를 떠올립니다.
+witness,keyword.alibi,Tendency2,npc.witness.alibi.hearing,미세한 청각으로 말끝의 흔들림을 듣습니다.
+witness,keyword.alibi,Tendency3,npc.witness.alibi.gaze,침묵의 응시로 회피 반응을 끌어냅니다.
 ```

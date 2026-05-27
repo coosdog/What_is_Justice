@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class BasePanelUI : MonoBehaviour
 {
     [SerializeField] protected GameObject panelRoot;
+    [SerializeField] private bool hideGameplayHudWhileVisible = true;
 
     public bool IsVisible => panelRoot != null && panelRoot.activeSelf;
 
@@ -14,6 +15,10 @@ public abstract class BasePanelUI : MonoBehaviour
     public virtual void Show()
     {
         EnsurePanelRoot();
+        if (hideGameplayHudWhileVisible)
+        {
+            GameplayHudVisibilityController.RequestHide(this);
+        }
 
         if (panelRoot != null)
         {
@@ -26,6 +31,11 @@ public abstract class BasePanelUI : MonoBehaviour
         if (panelRoot != null)
         {
             panelRoot.SetActive(false);
+        }
+
+        if (hideGameplayHudWhileVisible)
+        {
+            GameplayHudVisibilityController.ReleaseHide(this);
         }
     }
 

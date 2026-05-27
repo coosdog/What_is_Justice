@@ -16,10 +16,10 @@ MonoBehaviour:
   displayName: "한성미"
   firstInvestigationDialogueIds: []
   alreadyInvestigatedDialogueIds: []
-  firstInvestigationText: "낯선 사람과 이야기하는 건 아직 조금 어렵네요."
+  firstInvestigationText: "낯선 사람과 이야기하는 건 아직 조금 어렵네요. 밤에는 잠을 이루지 못해서 약을 먹고 쉬는 편이에요."
   alreadyInvestigatedText: "죄송해요. 지금은 더 말하기 힘들어요."
   dispositionOverrides: []
   rewardEvidence: {fileID: 0}
-  rewardEvidenceId: 
+  rewardEvidenceId: evidence.han_sleeping_pills
   nextBackground: {fileID: 0}
   runOutcomesOnlyOnFirstInvestigation: 1

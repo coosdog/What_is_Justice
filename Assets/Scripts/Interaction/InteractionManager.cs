@@ -131,8 +131,14 @@ public sealed class InteractionManager : MonoBehaviour
             return;
         }
 
-        bool isFirstInvestigation = _investigatedClueIds.Add(data.ClueId);
         PlayerDisposition disposition = dispositionManager != null ? dispositionManager.CurrentDisposition : PlayerDisposition.Basic;
+        if (!PlayerDispositionManager.IsInvestigationMode(disposition))
+        {
+            ShowModeMismatch(data.DisplayName, GetInvestigationMismatchText(disposition));
+            return;
+        }
+
+        bool isFirstInvestigation = _investigatedClueIds.Add(data.ClueId);
         List<DialogueLine> lines = isFirstInvestigation
             ? ResolveDialogueLines(data.EnumerateFirstInvestigationDialogueIds(disposition), data.DisplayName, data.GetFirstInvestigationText(disposition))
             : ResolveDialogueLines(data.EnumerateAlreadyInvestigatedDialogueIds(disposition), data.DisplayName, data.GetAlreadyInvestigatedText(disposition));
@@ -204,7 +210,7 @@ public sealed class InteractionManager : MonoBehaviour
                 if (dialogueDatabase != null && dialogueDatabase.TryGetEntry(dialogueId, out DialogueEntry entry))
                 {
                     string speaker = string.IsNullOrWhiteSpace(entry.Speaker) ? fallbackSpeaker : entry.Speaker;
-                    lines.Add(new DialogueLine(speaker, entry.Text));
+                    lines.Add(new DialogueLine(speaker, entry.Text, entry.PortraitKey, entry.Emotion));
                 }
             }
         }
@@ -215,6 +221,30 @@ public sealed class InteractionManager : MonoBehaviour
         }
 
         return lines;
+    }
+
+    private void ShowModeMismatch(string targetName, string message)
+    {
+        if (investigationUI == null || string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        string speaker = string.IsNullOrWhiteSpace(targetName) ? "조사" : targetName;
+        investigationUI.ShowSequence(new List<DialogueLine>
+        {
+            new(speaker, message)
+        });
+    }
+
+    private static string GetInvestigationMismatchText(PlayerDisposition disposition)
+    {
+        return disposition switch
+        {
+            PlayerDisposition.Tendency2 => "귀를 기울였지만, 이 단서는 아무 소리도 내지 않는다. 미세한 청각은 탐문 중 상대의 흔들림을 읽을 때 더 유효하다.",
+            PlayerDisposition.Tendency3 => "침묵은 대답할 상대가 있을 때 의미가 있다. 사물은 시선을 견디지도, 무너지지도 않는다.",
+            _ => string.Empty
+        };
     }
 
     private static bool WasAdvancePressedThisFrame()

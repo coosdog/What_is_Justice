@@ -16,10 +16,10 @@ MonoBehaviour:
   displayName: "윤태식"
   firstInvestigationDialogueIds: []
   alreadyInvestigatedDialogueIds: []
-  firstInvestigationText: "쓸데없는 말은 줄이고, 필요한 질문만 하시오."
+  firstInvestigationText: "쓸데없는 말은 줄이고, 필요한 질문만 하시오. 작업실의 칼과 약품은 모두 내 관리 아래 있소."
   alreadyInvestigatedText: "이미 들은 말을 반복하게 하지 마시오."
   dispositionOverrides: []
   rewardEvidence: {fileID: 0}
-  rewardEvidenceId: 
+  rewardEvidenceId: evidence.yoon_tool_trace
   nextBackground: {fileID: 0}
   runOutcomesOnlyOnFirstInvestigation: 1

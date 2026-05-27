@@ -145,14 +145,58 @@ public sealed class NpcInquiryManager : MonoBehaviour
         }
 
         PlayerDisposition disposition = dispositionManager != null ? dispositionManager.CurrentDisposition : PlayerDisposition.Basic;
+        if (!PlayerDispositionManager.IsInquiryMode(disposition))
+        {
+            ShowDialogue(null, npcData.DisplayName, GetInquiryMismatchText(disposition));
+            return;
+        }
+
         if (csvInvestigationDatabase != null && csvInvestigationDatabase.TryGetNpcTopic(npcData.NpcId, keyword.KeywordId, disposition, out CsvNpcInquiryTopicRecord topic))
         {
+            if (RequiresSpecificInquiryResponse(disposition) && IsBasicTopic(topic))
+            {
+                ShowDialogue(null, npcData.DisplayName, GetIneffectiveInquiryText(disposition));
+                return;
+            }
+
             ShowDialogue(topic.ResponseDialogueIds, npcData.DisplayName, topic.FallbackResponseText);
         }
         else
         {
             ShowDialogue(npcData.UnknownKeywordDialogueIds, npcData.DisplayName, npcData.UnknownKeywordFallbackText);
         }
+    }
+
+    private static bool RequiresSpecificInquiryResponse(PlayerDisposition disposition)
+    {
+        return disposition == PlayerDisposition.Tendency2 ||
+               disposition == PlayerDisposition.Tendency3;
+    }
+
+    private static bool IsBasicTopic(CsvNpcInquiryTopicRecord topic)
+    {
+        return topic == null ||
+               string.IsNullOrWhiteSpace(topic.Disposition) ||
+               string.Equals(topic.Disposition, "basic", System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetIneffectiveInquiryText(PlayerDisposition disposition)
+    {
+        return disposition switch
+        {
+            PlayerDisposition.Tendency2 => "귀를 기울였지만, 상대의 말에서는 더 읽어낼 흔들림이 없다. 이 질문에는 미세한 청각이 잘 맞지 않는다.",
+            PlayerDisposition.Tendency3 => "시선을 고정했지만, 상대는 쉽게 무너지지 않는다. 이 질문에는 침묵의 응시가 통하지 않는다.",
+            _ => string.Empty
+        };
+    }
+
+    private static string GetInquiryMismatchText(PlayerDisposition disposition)
+    {
+        return disposition switch
+        {
+            PlayerDisposition.Tendency1 => "예리한 시야로 상대의 표정과 자세는 살필 수 있지만, 말의 빈틈은 다른 방식으로 파고들어야 한다.",
+            _ => string.Empty
+        };
     }
 
     private void ShowDialogue(IEnumerable<string> dialogueIds, string fallbackSpeaker, string fallbackText)
@@ -177,7 +221,7 @@ public sealed class NpcInquiryManager : MonoBehaviour
                 if (dialogueDatabase != null && dialogueDatabase.TryGetEntry(dialogueId, out DialogueEntry entry))
                 {
                     string speaker = string.IsNullOrWhiteSpace(entry.Speaker) ? fallbackSpeaker : entry.Speaker;
-                    lines.Add(new DialogueLine(speaker, entry.Text));
+                    lines.Add(new DialogueLine(speaker, entry.Text, entry.PortraitKey, entry.Emotion));
                 }
             }
         }
