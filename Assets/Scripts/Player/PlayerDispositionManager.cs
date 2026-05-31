@@ -4,14 +4,30 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-public sealed class PlayerDispositionManager : MonoBehaviour
+public sealed class PlayerDispositionManager : PersistentSingleton<PlayerDispositionManager>
 {
     [SerializeField] private PlayerDisposition currentDisposition = PlayerDisposition.Basic;
     [SerializeField] private bool allowKeyboardSwitch = true;
 
     public event Action<PlayerDisposition> DispositionChanged;
 
-    public PlayerDisposition CurrentDisposition => currentDisposition;
+    public PlayerDisposition CurrentDisposition
+    {
+        get => currentDisposition;
+        set
+        {
+            if (currentDisposition == value)
+            {
+                return;
+            }
+
+            currentDisposition = value;
+            DispositionChanged?.Invoke(currentDisposition);
+        }
+    }
+
+    public string DisplayName => GetDisplayName(currentDisposition);
+    public bool AllowKeyboardSwitch { get => allowKeyboardSwitch; set => allowKeyboardSwitch = value; }
 
     private void Update()
     {
@@ -22,42 +38,30 @@ public sealed class PlayerDispositionManager : MonoBehaviour
 
         if (WasPressed(1))
         {
-            SetDisposition(PlayerDisposition.Basic);
+            CurrentDisposition = PlayerDisposition.Basic;
         }
         else if (WasPressed(2))
         {
-            SetDisposition(PlayerDisposition.Tendency1);
+            CurrentDisposition = PlayerDisposition.Tendency1;
         }
         else if (WasPressed(3))
         {
-            SetDisposition(PlayerDisposition.Tendency2);
+            CurrentDisposition = PlayerDisposition.Tendency2;
         }
         else if (WasPressed(4))
         {
-            SetDisposition(PlayerDisposition.Tendency3);
+            CurrentDisposition = PlayerDisposition.Tendency3;
         }
     }
 
     public void SetDisposition(PlayerDisposition disposition)
     {
-        if (currentDisposition == disposition)
-        {
-            return;
-        }
-
-        currentDisposition = disposition;
-        DispositionChanged?.Invoke(currentDisposition);
+        CurrentDisposition = disposition;
     }
 
     public string GetDisplayName()
     {
-        return currentDisposition switch
-        {
-            PlayerDisposition.Tendency1 => "예리한 시야",
-            PlayerDisposition.Tendency2 => "미세한 청각",
-            PlayerDisposition.Tendency3 => "침묵의 응시",
-            _ => "기본 관찰"
-        };
+        return DisplayName;
     }
 
     public static bool IsInvestigationMode(PlayerDisposition disposition)
@@ -77,10 +81,10 @@ public sealed class PlayerDispositionManager : MonoBehaviour
     {
         return disposition switch
         {
-            PlayerDisposition.Tendency1 => "예리한 시야",
-            PlayerDisposition.Tendency2 => "미세한 청각",
-            PlayerDisposition.Tendency3 => "침묵의 응시",
-            _ => "기본 관찰"
+            PlayerDisposition.Tendency1 => "\uC608\uB9AC\uD55C \uC2DC\uC57C",
+            PlayerDisposition.Tendency2 => "\uBBF8\uC138\uD55C \uCCAD\uAC01",
+            PlayerDisposition.Tendency3 => "\uCE68\uBB35\uC758 \uC751\uC2DC",
+            _ => "\uAE30\uBCF8 \uAD00\uCC30"
         };
     }
 

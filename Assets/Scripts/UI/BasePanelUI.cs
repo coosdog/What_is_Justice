@@ -17,7 +17,7 @@ public abstract class BasePanelUI : MonoBehaviour
         EnsurePanelRoot();
         if (hideGameplayHudWhileVisible)
         {
-            GameplayHudVisibilityController.RequestHide(this);
+            UIManager.Instance?.RequestHudHide(this);
         }
 
         if (panelRoot != null)
@@ -35,7 +35,7 @@ public abstract class BasePanelUI : MonoBehaviour
 
         if (hideGameplayHudWhileVisible)
         {
-            GameplayHudVisibilityController.ReleaseHide(this);
+            UIManager.Instance?.ReleaseHudHide(this);
         }
     }
 

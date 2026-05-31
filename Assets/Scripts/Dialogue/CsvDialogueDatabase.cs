@@ -80,7 +80,12 @@ public sealed class CsvDialogueDatabase : MonoBehaviour
                 GetCell(row, headers, "speaker"),
                 GetCell(row, headers, "text"),
                 GetCell(row, headers, "portrait_key"),
-                GetCell(row, headers, "emotion"));
+                GetCell(row, headers, "emotion"),
+                GetCell(row, headers, "board_node_id"),
+                GetCell(row, headers, "board_display_name"),
+                GetCell(row, headers, "board_description"),
+                GetOptionalBool(row, headers, "show_portraits", true),
+                GetCell(row, headers, "portrait_layout"));
 
             if (_entriesById.ContainsKey(entry.Id))
             {
@@ -111,6 +116,21 @@ public sealed class CsvDialogueDatabase : MonoBehaviour
         return headers.TryGetValue(columnName, out int index) && index >= 0 && index < row.Count
             ? row[index]
             : string.Empty;
+    }
+
+    private static bool GetOptionalBool(List<string> row, Dictionary<string, int> headers, string columnName, bool fallback)
+    {
+        string value = GetCell(row, headers, columnName);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return fallback;
+        }
+
+        value = value.Trim();
+        return value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+               value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+               value.Equals("y", StringComparison.OrdinalIgnoreCase) ||
+               value.Equals("1", StringComparison.OrdinalIgnoreCase);
     }
 
     private static List<List<string>> ParseCsv(string text)

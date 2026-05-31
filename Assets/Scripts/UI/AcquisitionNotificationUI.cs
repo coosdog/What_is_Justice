@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public sealed class AcquisitionNotificationUI : MonoBehaviour
 {
-    private const string TmpPrewarmText = "키워드 획득 단서 획득 알리바이 바뀐 약 단서를 획득했습니다";
+    private const string TmpPrewarmText = "\uD0A4\uC6CC\uB4DC \uD68D\uB4DD \uB2E8\uC11C \uD68D\uB4DD \uC54C\uB9AC\uBC14\uC774\uAC00 \uBCC0\uACBD\uB418\uC5C8\uC2B5\uB2C8\uB2E4 \uB2E8\uC11C\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4";
 
     [SerializeField] private EvidenceInventory evidenceInventory;
     [SerializeField] private float visibleSeconds = 1.45f;
@@ -44,6 +44,24 @@ public sealed class AcquisitionNotificationUI : MonoBehaviour
     private void OnDisable()
     {
         BindInventory(false);
+    }
+
+    public void ShowNotification(string title, string body)
+    {
+        if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(body))
+        {
+            return;
+        }
+
+        string normalizedTitle = string.IsNullOrWhiteSpace(title) ? "\uC54C\uB9BC" : title.Trim();
+        string normalizedBody = string.IsNullOrWhiteSpace(body) ? string.Empty : body.Trim();
+        int priority = normalizedTitle == "\uB2E8\uC11C \uD68D\uB4DD" ? 0 : 1;
+
+        _messages.Add(new NotificationMessage(normalizedTitle, normalizedBody, priority));
+        if (_displayRoutine == null)
+        {
+            _displayRoutine = StartCoroutine(DisplayQueuedMessages());
+        }
     }
 
     private void ResolveReferences()
@@ -143,7 +161,7 @@ public sealed class AcquisitionNotificationUI : MonoBehaviour
     {
         if (evidence != null)
         {
-            Enqueue("단서 획득", $"{evidence.DisplayName} 단서를 획득했습니다.");
+            ShowNotification("\uB2E8\uC11C \uD68D\uB4DD", $"{evidence.DisplayName} \uB2E8\uC11C\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4.");
         }
     }
 
@@ -151,7 +169,7 @@ public sealed class AcquisitionNotificationUI : MonoBehaviour
     {
         if (evidence != null)
         {
-            Enqueue("단서 획득", $"{evidence.DisplayName} 단서를 획득했습니다.");
+            ShowNotification("\uB2E8\uC11C \uD68D\uB4DD", $"{evidence.DisplayName} \uB2E8\uC11C\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4.");
         }
     }
 
@@ -159,7 +177,7 @@ public sealed class AcquisitionNotificationUI : MonoBehaviour
     {
         if (keyword != null)
         {
-            Enqueue("키워드 획득", $"{keyword.DisplayName} 키워드를 획득했습니다.");
+            ShowNotification("\uD0A4\uC6CC\uB4DC \uD68D\uB4DD", $"{keyword.DisplayName} \uD0A4\uC6CC\uB4DC\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4.");
         }
     }
 
@@ -167,17 +185,7 @@ public sealed class AcquisitionNotificationUI : MonoBehaviour
     {
         if (keyword != null)
         {
-            Enqueue("키워드 획득", $"{keyword.DisplayName} 키워드를 획득했습니다.");
-        }
-    }
-
-    private void Enqueue(string title, string body)
-    {
-        int priority = title == "단서 획득" ? 0 : 1;
-        _messages.Add(new NotificationMessage(title, body, priority));
-        if (_displayRoutine == null)
-        {
-            _displayRoutine = StartCoroutine(DisplayQueuedMessages());
+            ShowNotification("\uD0A4\uC6CC\uB4DC \uD68D\uB4DD", $"{keyword.DisplayName} \uD0A4\uC6CC\uB4DC\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4.");
         }
     }
 

@@ -5,7 +5,7 @@
 ## 필수 컬럼
 
 ```csv
-id,speaker,text,portrait_key,emotion
+id,speaker,text,portrait_key,emotion,board_node_id,board_display_name,board_description,show_portraits,portrait_layout
 ```
 
 - `id`: 스크립트에서 대사를 찾을 때 사용하는 고유 키입니다.
@@ -13,6 +13,11 @@ id,speaker,text,portrait_key,emotion
 - `text`: 실제로 출력될 조사 문장 또는 캐릭터 대사입니다.
 - `portrait_key`: 캐릭터 초상화를 찾을 때 사용할 선택 값입니다.
 - `emotion`: 캐릭터 표정이나 상태를 나타내는 선택 값입니다. 예: `calm`, `angry`, `sad`
+- `board_node_id`: 단서 연결 후보에 올릴 때 사용하는 고유 키입니다. 비워두면 연결 후보에 등록되지 않습니다.
+- `board_display_name`: 단서 연결 후보 목록에 표시할 이름입니다. 비워두면 `{speaker}의 발언`으로 표시됩니다.
+- `board_description`: 연결 후보 상세 설명입니다. 비워두면 `text`를 그대로 사용합니다.
+- `show_portraits`: A/B 캐릭터 이미지 창을 표시할지 정합니다. 비워두면 `true`이며, 나레이션은 `false`로 둡니다.
+- `portrait_layout`: 초상 표시 방식입니다. 비워두면 A/B 양쪽 표시, `single`/`left`/`player_only`는 A칸만 표시합니다.
 
 ## ID 작성 형식
 
@@ -75,6 +80,44 @@ character.detective.office.001
 ```
 
 대사 번호는 `001`, `002`, `003`처럼 세 자리 숫자로 쓰는 것을 추천합니다. 대사가 많아졌을 때 정렬이 깔끔하게 유지됩니다.
+
+## 단서 연결 후보 등록
+
+모든 대사가 자동으로 단서 연결 보드에 올라가지는 않습니다. 기획자가 중요한 발언만 `board_node_id`를 채운 행으로 지정합니다.
+
+예시:
+
+```csv
+id,speaker,text,portrait_key,emotion,board_node_id,board_display_name,board_description,show_portraits,portrait_layout
+character.witness.alibi.001,목격자,"그 시간에는 복도에 없었습니다.",witness,nervous,dialogue.witness.alibi,목격자의 알리바이 발언,복도에 없었다고 주장한 발언,true,
+```
+
+이렇게 지정된 발언은 대화 로그에는 그대로 기록되고, 단서 연결 보드에는 `[발언] 목격자의 알리바이 발언`으로 표시됩니다.
+
+## 나레이션 대사
+
+캐릭터가 말하는 대사가 아니라 장면 설명이나 나레이션이라면 `show_portraits`를 `false`로 둡니다.
+
+```csv
+id,speaker,text,portrait_key,emotion,board_node_id,board_display_name,board_description,show_portraits,portrait_layout
+system.office.narration.001,,"창밖으로 빗소리가 얇게 번진다.",narration,,,,,false,
+```
+
+`portrait_key`에 `none`, `off`, `narration`, `system`을 넣어도 A/B 이미지 창은 숨겨집니다.
+
+## 챕터 오프닝 대사
+
+챕터 시작 대사는 `ChapterOpeningDialoguePlayer`가 아래 prefix 규칙으로 자동 재생합니다.
+
+```text
+tutorial.opening.001
+tutorial.opening.002
+chapter1.opening.001
+chapter1.opening.002
+chapter2.opening.001
+```
+
+새 챕터를 만들 때는 별도 스크립트를 만들지 않고, 해당 챕터 prefix의 대사 행만 추가하면 됩니다. 씬에서 다른 prefix를 쓰고 싶다면 `ChapterOpeningDialoguePlayer`의 `Opening Dialogue Prefix` 값을 직접 지정합니다.
 
 ## 현재 책상 예시
 

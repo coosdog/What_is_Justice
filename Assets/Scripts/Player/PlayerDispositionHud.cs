@@ -55,7 +55,7 @@ public sealed class PlayerDispositionHud : MonoBehaviour
             return;
         }
 
-        string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "기본 관찰";
+        string disposition = dispositionManager != null ? dispositionManager.DisplayName : "기본 관찰";
         labelText.text = $"관찰모드: {disposition}  [1 기본/2 시야/3 청각/4 응시]";
     }
 }

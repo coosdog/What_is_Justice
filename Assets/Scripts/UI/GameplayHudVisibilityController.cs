@@ -12,6 +12,8 @@ public sealed class GameplayHudVisibilityController : MonoBehaviour
     private readonly Dictionary<GameObject, bool> _originalActiveStates = new();
     private readonly List<GameObject> _resolvedHudObjects = new();
 
+    public static bool IsHudHidden => _instance != null && _instance._hideRequesters.Count > 0;
+
     public static void RequestHide(Object requester)
     {
         if (requester == null)
@@ -30,6 +32,22 @@ public sealed class GameplayHudVisibilityController : MonoBehaviour
         }
 
         _instance.RemoveHideRequester(requester);
+    }
+
+    public static void Register(GameObject hudObject)
+    {
+        if (hudObject != null)
+        {
+            Instance.RegisterHudObject(hudObject);
+        }
+    }
+
+    public static void Unregister(GameObject hudObject)
+    {
+        if (hudObject != null && _instance != null)
+        {
+            _instance.UnregisterHudObject(hudObject);
+        }
     }
 
     public void RegisterHudObject(GameObject hudObject)

@@ -39,13 +39,13 @@ public sealed class CameraDragPanController : MonoBehaviour
 
         if (blockingUI == null)
         {
-            blockingUI = FindFirstObjectByType<InvestigationUI>();
+            blockingUI = FindFirstObjectByType<InvestigationUI>(FindObjectsInactive.Include);
         }
     }
 
     private void LateUpdate()
     {
-        if (!_isDragEnabled)
+        if (!_isDragEnabled || IsBlockedByVisibleUi())
         {
             _isDragging = false;
             return;
@@ -135,7 +135,7 @@ public sealed class CameraDragPanController : MonoBehaviour
 
     private bool CanStartDrag(Vector2 screenPosition)
     {
-        if (blockingUI != null && blockingUI.IsVisible)
+        if (IsBlockedByVisibleUi())
         {
             return false;
         }
@@ -153,6 +153,16 @@ public sealed class CameraDragPanController : MonoBehaviour
         Vector2 worldPoint = ScreenToCameraPlaneWorld(screenPosition);
         Collider2D hit = Physics2D.OverlapPoint(worldPoint, blockingLayers);
         return hit == null;
+    }
+
+    private bool IsBlockedByVisibleUi()
+    {
+        if (blockingUI == null)
+        {
+            blockingUI = FindFirstObjectByType<InvestigationUI>(FindObjectsInactive.Include);
+        }
+
+        return blockingUI != null && blockingUI.IsVisible;
     }
 
     private Vector3 ScreenToCameraPlaneWorld(Vector2 screenPosition)

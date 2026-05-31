@@ -64,23 +64,23 @@ public sealed class InvestigationBoardManager : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(firstNodeId) || string.IsNullOrWhiteSpace(secondNodeId))
         {
-            return LinkResult.Invalid("연결할 노드를 선택해야 한다.");
+            return LinkResult.Invalid("\uC5F0\uACB0\uD560 \uB178\uB4DC\uB97C \uC120\uD0DD\uD574\uC57C \uD569\uB2C8\uB2E4.");
         }
 
         if (string.Equals(firstNodeId, secondNodeId, StringComparison.OrdinalIgnoreCase))
         {
-            return LinkResult.Invalid("같은 노드는 서로 연결할 수 없다.");
+            return LinkResult.Invalid("\uAC19\uC740 \uB178\uB4DC\uB294 \uC11C\uB85C \uC5F0\uACB0\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
         }
 
         if (!HasNode(firstNodeId) || !HasNode(secondNodeId))
         {
-            return LinkResult.Invalid("현재 보드에 없는 노드는 연결할 수 없다.");
+            return LinkResult.Invalid("\uD604\uC7AC \uBCF4\uB4DC\uC5D0 \uC5C6\uB294 \uB178\uB4DC\uB294 \uC5F0\uACB0\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
         }
 
         string key = MakeLinkKey(firstNodeId, secondNodeId);
         if (!_links.Add(key))
         {
-            return LinkResult.Valid("이미 연결된 단서다.");
+            return LinkResult.Valid("\uC774\uBBF8 \uC5F0\uACB0\uB41C \uB2E8\uC11C\uC785\uB2C8\uB2E4.");
         }
 
         List<InvestigationHypothesis> created = EvaluateHypotheses();
@@ -88,10 +88,10 @@ public sealed class InvestigationBoardManager : MonoBehaviour
 
         if (created.Count > 0)
         {
-            return LinkResult.Valid($"새 가설 생성: {created[0].Title}");
+            return LinkResult.Valid($"\uC0C8 \uAC00\uC124 \uC0DD\uC131: {created[0].Title}");
         }
 
-        return LinkResult.Valid("두 단서를 연결했다. 아직 완성된 가설은 없다.");
+        return LinkResult.Valid("\uB2E8\uC11C\uB97C \uC5F0\uACB0\uD588\uC2B5\uB2C8\uB2E4. \uC544\uC9C1 \uC644\uC131\uB41C \uAC00\uC124\uC740 \uC5C6\uC2B5\uB2C8\uB2E4.");
     }
 
     public bool HasLink(string firstNodeId, string secondNodeId)
@@ -128,11 +128,20 @@ public sealed class InvestigationBoardManager : MonoBehaviour
 
         if (dialogueLog != null)
         {
-            for (int i = 0; i < dialogueLog.Entries.Count; i++)
+            foreach (DialogueLine line in dialogueLog.Entries)
             {
-                DialogueLine line = dialogueLog.Entries[i];
-                string label = string.IsNullOrWhiteSpace(line.Speaker) ? "발언" : $"{line.Speaker}의 발언";
-                AddNode($"dialogue.{i:000}", label, line.Text, InvestigationNodeType.Dialogue);
+                if (!line.IsBoardCandidate)
+                {
+                    continue;
+                }
+
+                string displayName = string.IsNullOrWhiteSpace(line.BoardDisplayName)
+                    ? BuildDialogueDisplayName(line)
+                    : line.BoardDisplayName;
+                string description = string.IsNullOrWhiteSpace(line.BoardDescription)
+                    ? line.Text
+                    : line.BoardDescription;
+                AddNode(line.BoardNodeId, displayName, description, InvestigationNodeType.Dialogue);
             }
         }
 
@@ -217,23 +226,23 @@ public sealed class InvestigationBoardManager : MonoBehaviour
         {
             new HypothesisRule(
                 "hypothesis.medicine_was_swapped",
-                "강민혁의 약은 바뀌었다",
-                "강민혁은 남이 건넨 약을 먹은 것이 아니라, 자기 약이라고 믿은 것을 직접 복용했다.",
+                "\uAC15\uBBFC\uD601\uC758 \uC57D\uC740 \uBC14\uB00C\uC5C8\uB2E4",
+                "\uAC15\uBBFC\uD601\uC740 \uC790\uC2E0\uC758 \uC57D\uC774\uB77C\uACE0 \uBBFF\uACE0 \uBCF5\uC6A9\uD588\uC9C0\uB9CC, \uC2E4\uC81C\uB85C\uB294 \uB2E4\uB978 \uC57D\uC774\uC5C8\uC744 \uAC00\uB2A5\uC131\uC774 \uC788\uB2E4.",
                 new[] { "evidence.kang_private_medicine", "keyword.medicine" }),
             new HypothesisRule(
                 "hypothesis.single_knife_many_hands",
-                "하나의 흉기, 여러 손",
-                "흉기는 하나처럼 보이지만 자상의 깊이와 각도가 달라 단독 범행으로 보기 어렵다.",
+                "\uD558\uB098\uC758 \uD749\uAE30, \uC5EC\uB7EC \uC190",
+                "\uD749\uAE30\uB294 \uD558\uB098\uCC98\uB7FC \uBCF4\uC774\uC9C0\uB9CC \uC0C1\uCC98\uC758 \uAE4A\uC774\uC640 \uAC01\uB3C4\uAC00 \uB2EC\uB77C \uB2E8\uB3C5 \uBC94\uD589\uC73C\uB85C \uBCF4\uAE30 \uC5B4\uB835\uB2E4.",
                 new[] { "evidence.single_knife", "keyword.wound" }),
             new HypothesisRule(
                 "hypothesis.choi_is_planted_suspect",
-                "최현도는 만들어진 범인이다",
-                "증거가 최현도를 향하지만 너무 완벽하게 정리되어 있어 누군가가 그를 범인으로 만들려 한 정황이 보인다.",
+                "\uCD5C\uD604\uB3C4\uB294 \uB9CC\uB4E4\uC5B4\uC9C4 \uBC94\uC778\uC774\uB2E4",
+                "\uC99D\uAC70\uAC00 \uCD5C\uD604\uB3C4\uB97C \uD5A5\uD558\uC9C0\uB9CC, \uB108\uBB34 \uB179\uC2A4\uB7FD\uAC8C \uC815\uB9AC\uB418\uC5B4 \uC788\uC5B4 \uB204\uAD70\uAC00\uAC00 \uADF8\uB97C \uBC94\uC778\uC73C\uB85C \uB9CC\uB4E0 \uB4EF\uD558\uB2E4.",
                 new[] { "evidence.choi_planted_clues", "keyword.planted_evidence" }),
             new HypothesisRule(
                 "hypothesis.documentary_gathered_people",
-                "다큐는 미끼였다",
-                "복귀 다큐는 강민혁을 산장으로 부르고 과거 사건 관계자들을 한곳에 모으기 위한 명분이었다.",
+                "\uB2E4\uD050\uBA58\uD130\uB9AC\uB294 \uBA85\uBD84\uC774\uC5C8\uB2E4",
+                "\uBCF5\uADC0 \uB2E4\uD050\uB294 \uAC15\uBBFC\uD601\uC744 \uD604\uC7A5\uC73C\uB85C \uBD80\uB974\uACE0 \uACFC\uAC70 \uC0AC\uAC74 \uAD00\uACC4\uC790\uB4E4\uC744 \uD55C\uB370 \uBAA8\uC73C\uAE30 \uC704\uD55C \uBA85\uBD84\uC774\uC5C8\uB2E4.",
                 new[] { "evidence.seo_production_note", "keyword.documentary" })
         };
     }
@@ -249,6 +258,13 @@ public sealed class InvestigationBoardManager : MonoBehaviour
         {
             dialogueLog = FindFirstObjectByType<DialogueLog>();
         }
+    }
+
+    private static string BuildDialogueDisplayName(DialogueLine line)
+    {
+        return string.IsNullOrWhiteSpace(line.Speaker)
+            ? "\uBC1C\uC5B8"
+            : $"{line.Speaker}\uC758 \uBC1C\uC5B8";
     }
 
     private void HandleInventoryChanged(EvidenceData _) => RebuildNodes();
@@ -341,6 +357,6 @@ public readonly struct LinkResult
     public bool Success { get; }
     public string Message { get; }
 
-    public static LinkResult Valid(string message) => new LinkResult(true, message);
-    public static LinkResult Invalid(string message) => new LinkResult(false, message);
+    public static LinkResult Valid(string message) => new(true, message);
+    public static LinkResult Invalid(string message) => new(false, message);
 }

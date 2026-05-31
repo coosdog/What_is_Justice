@@ -94,7 +94,7 @@ public sealed class InvestigationUI : BasePanelUI
         ResolvePortraitSpeakerNames();
         LastShownFrame = Time.frameCount;
         base.Show();
-        SetPortraitSlotsVisible(showTemporaryPortraitSlots);
+        SetPortraitSlotsVisible(ShouldShowPortraitSlots(_lines[0]));
         RenderCurrentLine();
     }
 
@@ -260,6 +260,14 @@ public sealed class InvestigationUI : BasePanelUI
             return;
         }
 
+        if (!ShouldShowPortraitSlots(currentLine))
+        {
+            SetPortraitSlotsVisible(false);
+            return;
+        }
+
+        SetPortraitSlotsVisible(true);
+
         string subject = string.IsNullOrWhiteSpace(currentLine.Speaker) ? string.Empty : currentLine.Speaker;
         bool leftIsActive = IsPlayerSpeaker(subject);
 
@@ -273,6 +281,7 @@ public sealed class InvestigationUI : BasePanelUI
 
         ApplyPortrait(_leftPortraitImage, _leftPortraitLabel, leftSprite, "A");
         ApplyPortrait(_rightPortraitImage, _rightPortraitLabel, rightSprite, "B");
+        ApplyPortraitLayout(currentLine);
 
         if (_leftPortraitName != null)
         {
@@ -299,6 +308,21 @@ public sealed class InvestigationUI : BasePanelUI
         {
             fallbackLabel.gameObject.SetActive(sprite == null);
             fallbackLabel.text = fallbackText;
+        }
+    }
+
+    private void ApplyPortraitLayout(DialogueLine currentLine)
+    {
+        bool singleLeft = IsSinglePortraitLayout(currentLine.PortraitLayout);
+
+        if (_leftPortraitRoot != null)
+        {
+            _leftPortraitRoot.gameObject.SetActive(true);
+        }
+
+        if (_rightPortraitRoot != null)
+        {
+            _rightPortraitRoot.gameObject.SetActive(!singleLeft);
         }
     }
 
@@ -347,6 +371,11 @@ public sealed class InvestigationUI : BasePanelUI
 
         foreach (DialogueLine line in _lines)
         {
+            if (!ShouldShowPortraitSlots(line))
+            {
+                continue;
+            }
+
             string speaker = line.Speaker;
             if (string.IsNullOrWhiteSpace(speaker))
             {
@@ -363,6 +392,11 @@ public sealed class InvestigationUI : BasePanelUI
 
         foreach (DialogueLine line in _lines)
         {
+            if (!ShouldShowPortraitSlots(line))
+            {
+                continue;
+            }
+
             string speaker = line.Speaker;
             if (!string.IsNullOrWhiteSpace(speaker) && !IsPlayerSpeaker(speaker))
             {
@@ -441,6 +475,26 @@ public sealed class InvestigationUI : BasePanelUI
         {
             _rightPortraitRoot.gameObject.SetActive(visible);
         }
+    }
+
+    private bool ShouldShowPortraitSlots(DialogueLine line)
+    {
+        return showTemporaryPortraitSlots && line.ShowPortraits && !IsPortraitSuppressedKey(line.PortraitKey);
+    }
+
+    private static bool IsSinglePortraitLayout(string portraitLayout)
+    {
+        return string.Equals(portraitLayout, "single", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitLayout, "left", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitLayout, "player_only", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPortraitSuppressedKey(string portraitKey)
+    {
+        return string.Equals(portraitKey, "none", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "off", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "narration", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "system", StringComparison.OrdinalIgnoreCase);
     }
 
     [Serializable]

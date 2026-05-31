@@ -221,7 +221,16 @@ public sealed class NpcInquiryManager : MonoBehaviour
                 if (dialogueDatabase != null && dialogueDatabase.TryGetEntry(dialogueId, out DialogueEntry entry))
                 {
                     string speaker = string.IsNullOrWhiteSpace(entry.Speaker) ? fallbackSpeaker : entry.Speaker;
-                    lines.Add(new DialogueLine(speaker, entry.Text, entry.PortraitKey, entry.Emotion));
+                    lines.Add(new DialogueLine(
+                        speaker,
+                        entry.Text,
+                        entry.PortraitKey,
+                        entry.Emotion,
+                        entry.BoardNodeId,
+                        entry.BoardDisplayName,
+                        entry.BoardDescription,
+                        entry.ShowPortraits,
+                        entry.PortraitLayout));
                 }
             }
         }

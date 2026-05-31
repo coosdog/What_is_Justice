@@ -2,6 +2,7 @@
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -15,10 +16,11 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         Npc,
         DialogueLog,
         Reflection,
-        Assistant
+        Assistant,
+        MagicCircle
     }
 
-    private const string TmpPrewarmText = "수사노트 단서 NPC 대화 기록 단서연결 가설 카드 사색에 잠기기 조수의 정리 기본 관찰 예리한 시야 미세한 청각 침묵의 응시";
+    private const string TmpPrewarmText = "수사노트 단서 NPC 대화 기록 단서연결 가설 카드 사색에 잠기기 조수의 정리 마법진 추리 중심그림 보조그림 작은문양 기본 관찰 예리한 시야 미세한 청각 침묵의 응시";
     private const int BoardVisibleNodeCount = 16;
 
     [Header("Scene References")]
@@ -33,6 +35,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     [SerializeField] private Button dialogueLogTabButton;
     [SerializeField] private Button reflectionTabButton;
     [SerializeField] private Button assistantTabButton;
+    [SerializeField] private Button magicCircleTabButton;
     [SerializeField] private Button closeButton;
 
     [Header("Data")]
@@ -42,11 +45,13 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     [SerializeField] private AssistantDiscussionManager assistantDiscussionManager;
     [SerializeField] private PlayerReflectionManager playerReflectionManager;
     [SerializeField] private InvestigationBoardManager investigationBoardManager;
+    [SerializeField] private MagicCircleInferenceManager magicCircleInferenceManager;
     [SerializeField] private PlayerDispositionManager dispositionManager;
 
     [Header("Input")]
     [SerializeField] private bool toggleWithKeyboard = true;
     [SerializeField] private KeyCode legacyToggleKey = KeyCode.N;
+    [SerializeField] private bool suppressUiNavigationWhileConnectingClues = true;
 
     [Header("Overlay")]
     [SerializeField] private GameObject[] hideWhileOpen;
@@ -57,12 +62,19 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     private int _secondBoardNodeIndex = 1;
     private int _boardScrollIndex;
     private string _lastBoardResult = "연결할 단서 두 개를 고르자.";
+    private int _magicMinorCursorIndex;
+    private MagicCircleInferenceResult _lastMagicCircleResult = MagicCircleInferenceResult.Failed("마법진 조각을 고른 뒤 판정해보자.");
+    private EventSystem _eventSystem;
+    private GameObject _previousSelectedObject;
+    private bool _previousSendNavigationEvents;
+    private bool _isSuppressingUiNavigation;
 
     protected override void Awake()
     {
         base.Awake();
         ResolveReferences();
 
+        CreateMissingMagicCircleTabButton();
         BindButtons();
         PrewarmTexts();
         Hide();
@@ -96,6 +108,8 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void OnDisable()
     {
+        RestoreUiNavigation();
+
         if (evidenceInventory != null)
         {
             evidenceInventory.EvidenceAdded -= HandleInventoryChanged;
@@ -133,6 +147,16 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         {
             HandleBoardInput();
         }
+
+        if (IsVisible && _currentTab == NotebookTab.MagicCircle)
+        {
+            HandleMagicCircleInput();
+        }
+
+        if (IsVisible && WasMagicCircleTabPressedThisFrame())
+        {
+            SelectTab(NotebookTab.MagicCircle);
+        }
     }
 
     public override void Show()
@@ -141,10 +165,12 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         HideOverlappedObjects();
         base.Show();
         Refresh();
+        UpdateUiNavigationSuppression();
     }
 
     public override void Hide()
     {
+        RestoreUiNavigation();
         base.Hide();
         RestoreHiddenObjects();
     }
@@ -154,11 +180,13 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     public void ShowDialogueLogTab() => SelectTab(NotebookTab.DialogueLog);
     public void ShowReflectionTab() => SelectTab(NotebookTab.Reflection);
     public void ShowAssistantTab() => SelectTab(NotebookTab.Assistant);
+    public void ShowMagicCircleTab() => SelectTab(NotebookTab.MagicCircle);
 
     private void SelectTab(NotebookTab tab)
     {
         _currentTab = tab;
         Refresh();
+        UpdateUiNavigationSuppression();
     }
 
     private void Refresh()
@@ -170,7 +198,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
         if (dispositionText != null)
         {
-            string disposition = dispositionManager != null ? dispositionManager.GetDisplayName() : "기본";
+            string disposition = dispositionManager != null ? dispositionManager.DisplayName : "기본";
             dispositionText.text = $"관찰모드: {disposition}    1 기본 관찰 / 2 예리한 시야 / 3 미세한 청각 / 4 침묵의 응시";
         }
 
@@ -187,6 +215,9 @@ public sealed class InvestigationNotebookUI : BasePanelUI
                 break;
             case NotebookTab.Assistant:
                 RenderAssistantTab();
+                break;
+            case NotebookTab.MagicCircle:
+                RenderMagicCircleTab();
                 break;
             default:
                 RenderEvidenceTab();
@@ -263,6 +294,12 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             : "조수가 아직 연결되지 않았습니다.";
 
         SetBodies(reflectionBody, assistantBody);
+    }
+
+    private void RenderMagicCircleTab()
+    {
+        SetTitles("마법진 조각", "마법진 추리");
+        SetBodies(BuildMagicCircleSelectionText(), BuildMagicCircleResultText());
     }
 
     private string BuildEvidenceText()
@@ -363,6 +400,56 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         return builder.ToString();
     }
 
+    private string BuildMagicCircleSelectionText()
+    {
+        if (magicCircleInferenceManager == null)
+        {
+            return "마법진 추리 매니저가 아직 연결되지 않았습니다.";
+        }
+
+        IReadOnlyList<MagicCirclePart> mainImages = magicCircleInferenceManager.GetParts(MagicCirclePartType.MainImage);
+        IReadOnlyList<MagicCirclePart> supportImages = magicCircleInferenceManager.GetParts(MagicCirclePartType.SupportImage);
+        IReadOnlyList<MagicCirclePart> minorPatterns = magicCircleInferenceManager.GetParts(MagicCirclePartType.MinorPattern);
+        ClampMagicCircleCursor(minorPatterns.Count);
+
+        StringBuilder builder = new();
+        builder.AppendLine("[현재 마법진]");
+        builder.AppendLine($"중심그림: {GetSelectedMagicPartName(MagicCirclePartType.MainImage)}");
+        builder.AppendLine($"보조그림: {GetSelectedMagicPartName(MagicCirclePartType.SupportImage)}");
+        builder.AppendLine($"작은문양: {BuildSelectedMinorPatternNames()}");
+        builder.AppendLine();
+        builder.AppendLine("[중심그림]");
+        AppendMagicPartList(builder, mainImages, magicCircleInferenceManager.SelectedMainImageId, -1);
+        builder.AppendLine();
+        builder.AppendLine("[보조그림]");
+        AppendMagicPartList(builder, supportImages, magicCircleInferenceManager.SelectedSupportImageId, -1);
+        builder.AppendLine();
+        builder.AppendLine("[작은문양]");
+        AppendMagicPartList(builder, minorPatterns, string.Empty, _magicMinorCursorIndex);
+        builder.AppendLine();
+        builder.AppendLine("M: 마법진 추리 탭");
+        builder.AppendLine("Q/E: 중심그림 변경  A/D: 보조그림 변경");
+        builder.AppendLine("Z/C: 작은문양 이동  Space: 작은문양 선택");
+        builder.AppendLine("Enter: 판정  R: 초기화");
+        return builder.ToString();
+    }
+
+    private string BuildMagicCircleResultText()
+    {
+        StringBuilder builder = new();
+        builder.AppendLine("[판정 결과]");
+        builder.AppendLine(_lastMagicCircleResult.Title);
+        AppendIfNotEmpty(builder, _lastMagicCircleResult.Description);
+        builder.AppendLine();
+        builder.AppendLine("[구조]");
+        builder.AppendLine("중심그림: 마법의 핵심 속성");
+        builder.AppendLine("보조그림: 마법의 작동 특성");
+        builder.AppendLine("작은문양: 조건, 대상, 범위 같은 세부 설정");
+        builder.AppendLine();
+        builder.AppendLine("이 탭은 임시 MVP입니다. 나중에는 각 조각을 종이 카드처럼 클릭해서 조합하는 UI로 바꿀 수 있습니다.");
+        return builder.ToString();
+    }
+
     private void SetTitles(string leftTitle, string rightTitle)
     {
         if (leftTitleText != null)
@@ -431,6 +518,16 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             investigationBoardManager = gameObject.AddComponent<InvestigationBoardManager>();
         }
 
+        if (magicCircleInferenceManager == null)
+        {
+            magicCircleInferenceManager = FindFirstObjectByType<MagicCircleInferenceManager>();
+        }
+
+        if (magicCircleInferenceManager == null)
+        {
+            magicCircleInferenceManager = gameObject.AddComponent<MagicCircleInferenceManager>();
+        }
+
         if (dispositionManager == null)
         {
             dispositionManager = FindFirstObjectByType<PlayerDispositionManager>();
@@ -439,11 +536,14 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void BindButtons()
     {
+        CreateMissingMagicCircleTabButton();
+
         BindButton(evidenceTabButton, ShowEvidenceTab);
         BindButton(npcTabButton, ShowNpcTab);
         BindButton(dialogueLogTabButton, ShowDialogueLogTab);
         BindButton(reflectionTabButton, ShowReflectionTab);
         BindButton(assistantTabButton, ShowAssistantTab);
+        BindButton(magicCircleTabButton, ShowMagicCircleTab);
         BindButton(closeButton, Hide);
     }
 
@@ -471,7 +571,39 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         TmpTextPrewarmUtility.Prewarm(dialogueLogTabButton, TmpPrewarmText);
         TmpTextPrewarmUtility.Prewarm(reflectionTabButton, TmpPrewarmText);
         TmpTextPrewarmUtility.Prewarm(assistantTabButton, TmpPrewarmText);
+        TmpTextPrewarmUtility.Prewarm(magicCircleTabButton, TmpPrewarmText);
         TmpTextPrewarmUtility.Prewarm(closeButton, TmpPrewarmText);
+    }
+
+    private void CreateMissingMagicCircleTabButton()
+    {
+        if (magicCircleTabButton != null || assistantTabButton == null)
+        {
+            return;
+        }
+
+        Button clonedButton = Instantiate(assistantTabButton, assistantTabButton.transform.parent);
+        clonedButton.name = "MagicCircleTabButton";
+        magicCircleTabButton = clonedButton;
+
+        RectTransform sourceRect = assistantTabButton.transform as RectTransform;
+        RectTransform clonedRect = clonedButton.transform as RectTransform;
+        if (sourceRect != null && clonedRect != null)
+        {
+            clonedRect.anchorMin = sourceRect.anchorMin;
+            clonedRect.anchorMax = sourceRect.anchorMax;
+            clonedRect.pivot = sourceRect.pivot;
+            clonedRect.sizeDelta = sourceRect.sizeDelta;
+            clonedRect.anchoredPosition = sourceRect.anchoredPosition + new Vector2(sourceRect.sizeDelta.x + 6f, 0f);
+        }
+
+        TMP_Text label = clonedButton.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = "마법진 추리";
+        }
+
+        clonedButton.onClick.RemoveAllListeners();
     }
 
     private void HandleInventoryChanged(EvidenceData _) => RefreshIfVisible();
@@ -498,6 +630,8 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void HandleBoardInput()
     {
+        UpdateUiNavigationSuppression();
+
         if (investigationBoardManager == null || investigationBoardManager.Nodes.Count == 0)
         {
             return;
@@ -550,6 +684,181 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             ClampBoardScroll();
             Refresh();
         }
+    }
+
+    private void HandleMagicCircleInput()
+    {
+        UpdateUiNavigationSuppression();
+
+        if (magicCircleInferenceManager == null)
+        {
+            return;
+        }
+
+        bool changed = false;
+        if (WasMagicKeyPressed(MagicKey.PreviousMain))
+        {
+            SelectAdjacentMagicPart(MagicCirclePartType.MainImage, -1);
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.NextMain))
+        {
+            SelectAdjacentMagicPart(MagicCirclePartType.MainImage, 1);
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.PreviousSupport))
+        {
+            SelectAdjacentMagicPart(MagicCirclePartType.SupportImage, -1);
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.NextSupport))
+        {
+            SelectAdjacentMagicPart(MagicCirclePartType.SupportImage, 1);
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.PreviousMinor))
+        {
+            _magicMinorCursorIndex--;
+            ClampMagicCircleCursor(magicCircleInferenceManager.GetParts(MagicCirclePartType.MinorPattern).Count);
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.NextMinor))
+        {
+            _magicMinorCursorIndex++;
+            ClampMagicCircleCursor(magicCircleInferenceManager.GetParts(MagicCirclePartType.MinorPattern).Count);
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.ToggleMinor))
+        {
+            IReadOnlyList<MagicCirclePart> minorPatterns = magicCircleInferenceManager.GetParts(MagicCirclePartType.MinorPattern);
+            if (minorPatterns.Count > 0)
+            {
+                ClampMagicCircleCursor(minorPatterns.Count);
+                magicCircleInferenceManager.ToggleMinorPattern(minorPatterns[_magicMinorCursorIndex].PartId);
+                changed = true;
+            }
+        }
+        else if (WasMagicKeyPressed(MagicKey.Infer))
+        {
+            _lastMagicCircleResult = magicCircleInferenceManager.Infer();
+            changed = true;
+        }
+        else if (WasMagicKeyPressed(MagicKey.Clear))
+        {
+            magicCircleInferenceManager.ClearSelection();
+            _lastMagicCircleResult = MagicCircleInferenceResult.Failed("마법진 조각을 고른 뒤 판정해보자.");
+            changed = true;
+        }
+
+        if (changed)
+        {
+            Refresh();
+        }
+    }
+
+    private void SelectAdjacentMagicPart(MagicCirclePartType type, int direction)
+    {
+        IReadOnlyList<MagicCirclePart> parts = magicCircleInferenceManager.GetParts(type);
+        if (parts.Count == 0)
+        {
+            return;
+        }
+
+        string selectedId = type == MagicCirclePartType.MainImage
+            ? magicCircleInferenceManager.SelectedMainImageId
+            : magicCircleInferenceManager.SelectedSupportImageId;
+        int selectedIndex = FindMagicPartIndex(parts, selectedId);
+        int nextIndex = WrapIndex(selectedIndex + direction, parts.Count);
+
+        if (type == MagicCirclePartType.MainImage)
+        {
+            magicCircleInferenceManager.SelectMainImage(parts[nextIndex].PartId);
+        }
+        else if (type == MagicCirclePartType.SupportImage)
+        {
+            magicCircleInferenceManager.SelectSupportImage(parts[nextIndex].PartId);
+        }
+    }
+
+    private string GetSelectedMagicPartName(MagicCirclePartType type)
+    {
+        return magicCircleInferenceManager.TryGetSelectedPart(type, out MagicCirclePart selectedPart)
+            ? selectedPart.DisplayName
+            : "선택 안 됨";
+    }
+
+    private string BuildSelectedMinorPatternNames()
+    {
+        IReadOnlyList<string> selectedIds = magicCircleInferenceManager.SelectedMinorPatternIds;
+        if (selectedIds.Count == 0)
+        {
+            return "선택 안 됨";
+        }
+
+        IReadOnlyList<MagicCirclePart> minorPatterns = magicCircleInferenceManager.GetParts(MagicCirclePartType.MinorPattern);
+        StringBuilder builder = new();
+        for (int i = 0; i < selectedIds.Count; i++)
+        {
+            if (i > 0)
+            {
+                builder.Append(", ");
+            }
+
+            int partIndex = FindMagicPartIndex(minorPatterns, selectedIds[i]);
+            builder.Append(partIndex >= 0 ? minorPatterns[partIndex].DisplayName : selectedIds[i]);
+        }
+
+        return builder.ToString();
+    }
+
+    private void AppendMagicPartList(StringBuilder builder, IReadOnlyList<MagicCirclePart> parts, string selectedId, int cursorIndex)
+    {
+        if (parts.Count == 0)
+        {
+            builder.AppendLine("- 등록된 조각 없음");
+            return;
+        }
+
+        IReadOnlyList<string> selectedMinorPatterns = magicCircleInferenceManager.SelectedMinorPatternIds;
+        for (int i = 0; i < parts.Count; i++)
+        {
+            MagicCirclePart part = parts[i];
+            bool selected = !string.IsNullOrWhiteSpace(selectedId) && part.MatchesId(selectedId);
+            bool minorSelected = ContainsMagicPartId(selectedMinorPatterns, part.PartId);
+            string marker = i == cursorIndex ? ">" : selected || minorSelected ? "*" : "-";
+            builder.AppendLine($"{marker} {part.DisplayName}: {part.Description}");
+        }
+    }
+
+    private void ClampMagicCircleCursor(int count)
+    {
+        _magicMinorCursorIndex = count <= 0 ? 0 : WrapIndex(_magicMinorCursorIndex, count);
+    }
+
+    private static int FindMagicPartIndex(IReadOnlyList<MagicCirclePart> parts, string partId)
+    {
+        for (int i = 0; i < parts.Count; i++)
+        {
+            if (parts[i].MatchesId(partId))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static bool ContainsMagicPartId(IReadOnlyList<string> partIds, string partId)
+    {
+        for (int i = 0; i < partIds.Count; i++)
+        {
+            if (string.Equals(partIds[i], partId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ClampBoardSelection()
@@ -701,6 +1010,68 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 #endif
     }
 
+    private void UpdateUiNavigationSuppression()
+    {
+        if (!suppressUiNavigationWhileConnectingClues ||
+            !IsVisible ||
+            (_currentTab != NotebookTab.Reflection && _currentTab != NotebookTab.MagicCircle))
+        {
+            RestoreUiNavigation();
+            return;
+        }
+
+        SuppressUiNavigation();
+    }
+
+    private void SuppressUiNavigation()
+    {
+        if (_eventSystem == null)
+        {
+            _eventSystem = EventSystem.current;
+        }
+
+        if (_eventSystem == null)
+        {
+            return;
+        }
+
+        if (_isSuppressingUiNavigation)
+        {
+            if (_eventSystem.currentSelectedGameObject != null)
+            {
+                _eventSystem.SetSelectedGameObject(null);
+            }
+
+            return;
+        }
+
+        _previousSendNavigationEvents = _eventSystem.sendNavigationEvents;
+        _previousSelectedObject = _eventSystem.currentSelectedGameObject;
+        _eventSystem.sendNavigationEvents = false;
+        _eventSystem.SetSelectedGameObject(null);
+        _isSuppressingUiNavigation = true;
+    }
+
+    private void RestoreUiNavigation()
+    {
+        if (!_isSuppressingUiNavigation)
+        {
+            return;
+        }
+
+        if (_eventSystem != null)
+        {
+            _eventSystem.sendNavigationEvents = _previousSendNavigationEvents;
+            if (_previousSelectedObject != null && _previousSelectedObject.activeInHierarchy)
+            {
+                _eventSystem.SetSelectedGameObject(_previousSelectedObject);
+            }
+        }
+
+        _previousSelectedObject = null;
+        _isSuppressingUiNavigation = false;
+    }
+
     private enum BoardKey
     {
         PreviousFirst,
@@ -710,6 +1081,19 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         Connect,
         ScrollUp,
         ScrollDown
+    }
+
+    private enum MagicKey
+    {
+        PreviousMain,
+        NextMain,
+        PreviousSupport,
+        NextSupport,
+        PreviousMinor,
+        NextMinor,
+        ToggleMinor,
+        Infer,
+        Clear
     }
 
     private static int GetBoardScrollDelta()
@@ -783,6 +1167,59 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             BoardKey.Connect => Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter),
             BoardKey.ScrollUp => Input.GetKeyDown(KeyCode.UpArrow),
             BoardKey.ScrollDown => Input.GetKeyDown(KeyCode.DownArrow),
+            _ => false
+        };
+#else
+        return false;
+#endif
+    }
+
+    private static bool WasMagicCircleTabPressedThisFrame()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        return keyboard != null && keyboard.mKey.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        return Input.GetKeyDown(KeyCode.M);
+#else
+        return false;
+#endif
+    }
+
+    private static bool WasMagicKeyPressed(MagicKey key)
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+        {
+            return false;
+        }
+
+        return key switch
+        {
+            MagicKey.PreviousMain => keyboard.qKey.wasPressedThisFrame,
+            MagicKey.NextMain => keyboard.eKey.wasPressedThisFrame,
+            MagicKey.PreviousSupport => keyboard.aKey.wasPressedThisFrame,
+            MagicKey.NextSupport => keyboard.dKey.wasPressedThisFrame,
+            MagicKey.PreviousMinor => keyboard.zKey.wasPressedThisFrame,
+            MagicKey.NextMinor => keyboard.cKey.wasPressedThisFrame,
+            MagicKey.ToggleMinor => keyboard.spaceKey.wasPressedThisFrame,
+            MagicKey.Infer => keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame,
+            MagicKey.Clear => keyboard.rKey.wasPressedThisFrame,
+            _ => false
+        };
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        return key switch
+        {
+            MagicKey.PreviousMain => Input.GetKeyDown(KeyCode.Q),
+            MagicKey.NextMain => Input.GetKeyDown(KeyCode.E),
+            MagicKey.PreviousSupport => Input.GetKeyDown(KeyCode.A),
+            MagicKey.NextSupport => Input.GetKeyDown(KeyCode.D),
+            MagicKey.PreviousMinor => Input.GetKeyDown(KeyCode.Z),
+            MagicKey.NextMinor => Input.GetKeyDown(KeyCode.C),
+            MagicKey.ToggleMinor => Input.GetKeyDown(KeyCode.Space),
+            MagicKey.Infer => Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter),
+            MagicKey.Clear => Input.GetKeyDown(KeyCode.R),
             _ => false
         };
 #else
