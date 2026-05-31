@@ -68,13 +68,21 @@ public sealed class InvestigationNotebookUI : BasePanelUI
     private GameObject _previousSelectedObject;
     private bool _previousSendNavigationEvents;
     private bool _isSuppressingUiNavigation;
+    private MagicCirclePartType _activeMagicPartType = MagicCirclePartType.MainImage;
+    private GameObject _magicLeftRoot;
+    private GameObject _magicRightRoot;
+    private RectTransform _magicPartContent;
+    private TMP_Text _magicMainSelectorText;
+    private TMP_Text _magicSupportSelectorText;
+    private TMP_Text _magicMinorSelectorText;
+    private TMP_Text _magicPreviewText;
+    private TMP_Text _magicResultText;
 
     protected override void Awake()
     {
         base.Awake();
         ResolveReferences();
 
-        CreateMissingMagicCircleTabButton();
         BindButtons();
         PrewarmTexts();
         Hide();
@@ -191,6 +199,12 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void Refresh()
     {
+        if (_currentTab != NotebookTab.MagicCircle)
+        {
+            SetMagicCircleVisualVisible(false);
+            SetTextBodiesVisible(true);
+        }
+
         if (titleText != null)
         {
             titleText.text = "수사노트";
@@ -298,8 +312,12 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void RenderMagicCircleTab()
     {
-        SetTitles("마법진 조각", "마법진 추리");
-        SetBodies(BuildMagicCircleSelectionText(), BuildMagicCircleResultText());
+        SetTitles("마법진 조각", "마법진 판");
+        SetBodies(string.Empty, string.Empty);
+        SetTextBodiesVisible(false);
+        EnsureMagicCircleVisualUI();
+        SetMagicCircleVisualVisible(true);
+        RefreshMagicCircleVisualUI();
     }
 
     private string BuildEvidenceText()
@@ -450,6 +468,357 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         return builder.ToString();
     }
 
+    private void EnsureMagicCircleVisualUI()
+    {
+        if (_magicLeftRoot != null || leftBodyText == null || rightBodyText == null)
+        {
+            return;
+        }
+
+        Transform leftParent = leftBodyText.transform.parent;
+        Transform rightParent = rightBodyText.transform.parent;
+        TMP_FontAsset font = leftBodyText.font;
+
+        _magicLeftRoot = CreatePanelRoot(leftParent, "MagicCirclePartSelectionRoot");
+        _magicRightRoot = CreatePanelRoot(rightParent, "MagicCirclePreviewRoot");
+
+        RectTransform selectorRow = CreateRect("PartTypeSelectors", _magicLeftRoot.transform);
+        selectorRow.anchorMin = new Vector2(0f, 1f);
+        selectorRow.anchorMax = new Vector2(1f, 1f);
+        selectorRow.pivot = new Vector2(0.5f, 1f);
+        selectorRow.anchoredPosition = new Vector2(0f, -10f);
+        selectorRow.sizeDelta = new Vector2(0f, 54f);
+        HorizontalLayoutGroup selectorLayout = selectorRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+        selectorLayout.spacing = 12f;
+        selectorLayout.childForceExpandWidth = true;
+        selectorLayout.childForceExpandHeight = true;
+        selectorLayout.padding = new RectOffset(6, 6, 0, 0);
+
+        _magicMainSelectorText = CreateMagicButton(selectorRow, "MainPatternButton", "메인문양", font, () => SelectMagicPartType(MagicCirclePartType.MainImage));
+        _magicSupportSelectorText = CreateMagicButton(selectorRow, "SupportPatternButton", "보조문양", font, () => SelectMagicPartType(MagicCirclePartType.SupportImage));
+        _magicMinorSelectorText = CreateMagicButton(selectorRow, "MinorPatternButton", "작은문양", font, () => SelectMagicPartType(MagicCirclePartType.MinorPattern));
+
+        RectTransform scrollRoot = CreateRect("MagicPartScroll", _magicLeftRoot.transform);
+        scrollRoot.anchorMin = new Vector2(0f, 0f);
+        scrollRoot.anchorMax = new Vector2(1f, 1f);
+        scrollRoot.offsetMin = new Vector2(6f, 8f);
+        scrollRoot.offsetMax = new Vector2(-6f, -76f);
+        Image scrollImage = scrollRoot.gameObject.AddComponent<Image>();
+        scrollImage.color = new Color(0f, 0f, 0f, 0.03f);
+        scrollImage.raycastTarget = true;
+
+        ScrollRect scrollRect = scrollRoot.gameObject.AddComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+        scrollRect.scrollSensitivity = 28f;
+
+        RectTransform viewport = CreateRect("Viewport", scrollRoot);
+        viewport.anchorMin = Vector2.zero;
+        viewport.anchorMax = Vector2.one;
+        viewport.offsetMin = Vector2.zero;
+        viewport.offsetMax = Vector2.zero;
+        Image viewportImage = viewport.gameObject.AddComponent<Image>();
+        viewportImage.color = new Color(1f, 1f, 1f, 0.01f);
+        viewport.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+
+        _magicPartContent = CreateRect("Content", viewport);
+        _magicPartContent.anchorMin = new Vector2(0f, 1f);
+        _magicPartContent.anchorMax = new Vector2(1f, 1f);
+        _magicPartContent.pivot = new Vector2(0.5f, 1f);
+        _magicPartContent.anchoredPosition = Vector2.zero;
+        _magicPartContent.sizeDelta = Vector2.zero;
+
+        GridLayoutGroup grid = _magicPartContent.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(170f, 220f);
+        grid.spacing = new Vector2(14f, 16f);
+        grid.padding = new RectOffset(18, 18, 10, 10);
+        grid.childAlignment = TextAnchor.UpperCenter;
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 3;
+
+        ContentSizeFitter fitter = _magicPartContent.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        scrollRect.viewport = viewport;
+        scrollRect.content = _magicPartContent;
+
+        _magicPreviewText = CreateText(_magicRightRoot.transform, "MagicCirclePreviewText", font, 24, TextAlignmentOptions.Center);
+        RectTransform previewRect = _magicPreviewText.rectTransform;
+        previewRect.anchorMin = new Vector2(0.06f, 0.18f);
+        previewRect.anchorMax = new Vector2(0.94f, 0.94f);
+        previewRect.offsetMin = Vector2.zero;
+        previewRect.offsetMax = Vector2.zero;
+
+        RectTransform actionRow = CreateRect("MagicCircleActions", _magicRightRoot.transform);
+        actionRow.anchorMin = new Vector2(0f, 0f);
+        actionRow.anchorMax = new Vector2(1f, 0f);
+        actionRow.pivot = new Vector2(0.5f, 0f);
+        actionRow.anchoredPosition = new Vector2(0f, 16f);
+        actionRow.sizeDelta = new Vector2(0f, 46f);
+        HorizontalLayoutGroup actionLayout = actionRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+        actionLayout.spacing = 12f;
+        actionLayout.childForceExpandWidth = false;
+        actionLayout.childForceExpandHeight = true;
+        actionLayout.childAlignment = TextAnchor.MiddleCenter;
+
+        CreateMagicButton(actionRow, "InferMagicButton", "판정하기", font, InferMagicCircle);
+        CreateMagicButton(actionRow, "ClearMagicButton", "초기화", font, ClearMagicCircle);
+
+        _magicResultText = CreateText(_magicRightRoot.transform, "MagicCircleResultText", font, 18, TextAlignmentOptions.Center);
+        RectTransform resultRect = _magicResultText.rectTransform;
+        resultRect.anchorMin = new Vector2(0.08f, 0.06f);
+        resultRect.anchorMax = new Vector2(0.92f, 0.16f);
+        resultRect.offsetMin = Vector2.zero;
+        resultRect.offsetMax = Vector2.zero;
+    }
+
+    private void RefreshMagicCircleVisualUI()
+    {
+        if (magicCircleInferenceManager == null || _magicPartContent == null)
+        {
+            return;
+        }
+
+        UpdateMagicSelectorLabels();
+        RebuildMagicPartButtons();
+        UpdateMagicPreview();
+    }
+
+    private void SelectMagicPartType(MagicCirclePartType type)
+    {
+        _activeMagicPartType = type;
+        RefreshMagicCircleVisualUI();
+    }
+
+    private void SelectMagicCirclePart(MagicCirclePart part)
+    {
+        if (part == null || magicCircleInferenceManager == null)
+        {
+            return;
+        }
+
+        if (part.Type == MagicCirclePartType.MainImage)
+        {
+            magicCircleInferenceManager.SelectMainImage(part.PartId);
+        }
+        else if (part.Type == MagicCirclePartType.SupportImage)
+        {
+            magicCircleInferenceManager.SelectSupportImage(part.PartId);
+        }
+        else
+        {
+            magicCircleInferenceManager.SelectMinorPattern(part.PartId);
+        }
+
+        RefreshMagicCircleVisualUI();
+    }
+
+    private void InferMagicCircle()
+    {
+        if (magicCircleInferenceManager == null)
+        {
+            return;
+        }
+
+        _lastMagicCircleResult = magicCircleInferenceManager.Infer();
+        UpdateMagicPreview();
+    }
+
+    private void ClearMagicCircle()
+    {
+        if (magicCircleInferenceManager == null)
+        {
+            return;
+        }
+
+        magicCircleInferenceManager.ClearSelection();
+        _lastMagicCircleResult = MagicCircleInferenceResult.Failed("마법진 조각을 고른 뒤 판정해보자.");
+        RefreshMagicCircleVisualUI();
+    }
+
+    private void UpdateMagicSelectorLabels()
+    {
+        if (_magicMainSelectorText != null)
+        {
+            _magicMainSelectorText.text = BuildSelectorText("메인문양", GetSelectedMagicPartName(MagicCirclePartType.MainImage), MagicCirclePartType.MainImage);
+        }
+
+        if (_magicSupportSelectorText != null)
+        {
+            _magicSupportSelectorText.text = BuildSelectorText("보조문양", GetSelectedMagicPartName(MagicCirclePartType.SupportImage), MagicCirclePartType.SupportImage);
+        }
+
+        if (_magicMinorSelectorText != null)
+        {
+            _magicMinorSelectorText.text = BuildSelectorText("작은문양", BuildSelectedMinorPatternNames(), MagicCirclePartType.MinorPattern);
+        }
+    }
+
+    private void RebuildMagicPartButtons()
+    {
+        for (int i = _magicPartContent.childCount - 1; i >= 0; i--)
+        {
+            Destroy(_magicPartContent.GetChild(i).gameObject);
+        }
+
+        IReadOnlyList<MagicCirclePart> parts = magicCircleInferenceManager.GetParts(_activeMagicPartType);
+        for (int i = 0; i < parts.Count; i++)
+        {
+            MagicCirclePart part = parts[i];
+            TMP_Text label = CreateMagicButton(_magicPartContent, $"MagicPart_{part.PartId}", BuildMagicPartButtonText(part), leftBodyText != null ? leftBodyText.font : null, () => SelectMagicCirclePart(part));
+            Image image = label.GetComponentInParent<Image>();
+            if (image != null)
+            {
+                image.color = IsMagicPartSelected(part) ? new Color(0.48f, 0.42f, 0.28f, 0.95f) : new Color(0.88f, 0.83f, 0.68f, 0.92f);
+            }
+        }
+    }
+
+    private void UpdateMagicPreview()
+    {
+        if (_magicPreviewText == null || magicCircleInferenceManager == null)
+        {
+            return;
+        }
+
+        string main = GetSelectedMagicPartName(MagicCirclePartType.MainImage);
+        string support = GetSelectedMagicPartName(MagicCirclePartType.SupportImage);
+        string minor = BuildSelectedMinorPatternNames();
+        _magicPreviewText.text =
+            $"<size=260>◎</size>\n" +
+            $"<size=32>{main}</size>\n" +
+            $"<size=22>{support}</size>\n" +
+            $"<size=18>{minor}</size>";
+
+        if (_magicResultText != null)
+        {
+            _magicResultText.text = $"{_lastMagicCircleResult.Title}\n{_lastMagicCircleResult.Description}";
+        }
+    }
+
+    private string BuildSelectorText(string title, string value, MagicCirclePartType type)
+    {
+        string marker = _activeMagicPartType == type ? "▶ " : string.Empty;
+        return $"{marker}{title}\n<size=15>{value}</size>";
+    }
+
+    private string BuildMagicPartButtonText(MagicCirclePart part)
+    {
+        string selected = IsMagicPartSelected(part) ? "✓ " : string.Empty;
+        return $"{selected}{part.DisplayName}\n\n<size=46>◎</size>\n\n<size=13>{part.Description}</size>";
+    }
+
+    private bool IsMagicPartSelected(MagicCirclePart part)
+    {
+        if (part == null)
+        {
+            return false;
+        }
+
+        return part.Type switch
+        {
+            MagicCirclePartType.MainImage => part.MatchesId(magicCircleInferenceManager.SelectedMainImageId),
+            MagicCirclePartType.SupportImage => part.MatchesId(magicCircleInferenceManager.SelectedSupportImageId),
+            MagicCirclePartType.MinorPattern => ContainsMagicPartId(magicCircleInferenceManager.SelectedMinorPatternIds, part.PartId),
+            _ => false
+        };
+    }
+
+    private void SetTextBodiesVisible(bool visible)
+    {
+        if (leftBodyText != null)
+        {
+            leftBodyText.gameObject.SetActive(visible);
+        }
+
+        if (rightBodyText != null)
+        {
+            rightBodyText.gameObject.SetActive(visible);
+        }
+    }
+
+    private void SetMagicCircleVisualVisible(bool visible)
+    {
+        if (_magicLeftRoot != null)
+        {
+            _magicLeftRoot.SetActive(visible);
+        }
+
+        if (_magicRightRoot != null)
+        {
+            _magicRightRoot.SetActive(visible);
+        }
+    }
+
+    private static GameObject CreatePanelRoot(Transform parent, string objectName)
+    {
+        GameObject rootObject = new(objectName);
+        rootObject.transform.SetParent(parent, false);
+        RectTransform rect = rootObject.AddComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = new Vector2(10f, 10f);
+        rect.offsetMax = new Vector2(-10f, -10f);
+        return rootObject;
+    }
+
+    private static RectTransform CreateRect(string objectName, Transform parent)
+    {
+        GameObject gameObject = new(objectName);
+        gameObject.transform.SetParent(parent, false);
+        return gameObject.AddComponent<RectTransform>();
+    }
+
+    private static TMP_Text CreateText(Transform parent, string objectName, TMP_FontAsset font, int fontSize, TextAlignmentOptions alignment)
+    {
+        RectTransform rect = CreateRect(objectName, parent);
+        TMP_Text text = rect.gameObject.AddComponent<TextMeshProUGUI>();
+        text.font = font;
+        text.fontSize = fontSize;
+        text.color = new Color(0.19f, 0.17f, 0.14f, 0.92f);
+        text.alignment = alignment;
+        text.raycastTarget = false;
+        text.enableWordWrapping = true;
+        return text;
+    }
+
+    private static TMP_Text CreateMagicButton(RectTransform parent, string objectName, string label, TMP_FontAsset font, UnityEngine.Events.UnityAction action)
+    {
+        GameObject buttonObject = new(objectName);
+        buttonObject.transform.SetParent(parent, false);
+        RectTransform rect = buttonObject.AddComponent<RectTransform>();
+
+        Image image = buttonObject.AddComponent<Image>();
+        image.color = new Color(0.88f, 0.83f, 0.68f, 0.92f);
+
+        Button button = buttonObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        button.onClick.AddListener(action);
+
+        GameObject textObject = new("Label");
+        textObject.transform.SetParent(buttonObject.transform, false);
+        RectTransform textRect = textObject.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(8f, 6f);
+        textRect.offsetMax = new Vector2(-8f, -6f);
+
+        TMP_Text text = textObject.AddComponent<TextMeshProUGUI>();
+        text.font = font;
+        text.text = label;
+        text.fontSize = 17f;
+        text.color = new Color(0.12f, 0.1f, 0.08f, 0.95f);
+        text.alignment = TextAlignmentOptions.Center;
+        text.enableWordWrapping = true;
+        text.overflowMode = TextOverflowModes.Ellipsis;
+
+        LayoutElement layout = buttonObject.AddComponent<LayoutElement>();
+        layout.preferredWidth = 150f;
+        layout.preferredHeight = 46f;
+
+        return text;
+    }
+
     private void SetTitles(string leftTitle, string rightTitle)
     {
         if (leftTitleText != null)
@@ -536,7 +905,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
 
     private void BindButtons()
     {
-        CreateMissingMagicCircleTabButton();
+        ResolveMagicCircleTabButton();
 
         BindButton(evidenceTabButton, ShowEvidenceTab);
         BindButton(npcTabButton, ShowNpcTab);
@@ -575,35 +944,29 @@ public sealed class InvestigationNotebookUI : BasePanelUI
         TmpTextPrewarmUtility.Prewarm(closeButton, TmpPrewarmText);
     }
 
-    private void CreateMissingMagicCircleTabButton()
+    private void ResolveMagicCircleTabButton()
     {
-        if (magicCircleTabButton != null || assistantTabButton == null)
+        if (magicCircleTabButton != null)
         {
             return;
         }
 
-        Button clonedButton = Instantiate(assistantTabButton, assistantTabButton.transform.parent);
-        clonedButton.name = "MagicCircleTabButton";
-        magicCircleTabButton = clonedButton;
-
-        RectTransform sourceRect = assistantTabButton.transform as RectTransform;
-        RectTransform clonedRect = clonedButton.transform as RectTransform;
-        if (sourceRect != null && clonedRect != null)
+        Button[] buttons = FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Button button in buttons)
         {
-            clonedRect.anchorMin = sourceRect.anchorMin;
-            clonedRect.anchorMax = sourceRect.anchorMax;
-            clonedRect.pivot = sourceRect.pivot;
-            clonedRect.sizeDelta = sourceRect.sizeDelta;
-            clonedRect.anchoredPosition = sourceRect.anchoredPosition + new Vector2(sourceRect.sizeDelta.x + 6f, 0f);
-        }
+            TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+            if (label == null)
+            {
+                continue;
+            }
 
-        TMP_Text label = clonedButton.GetComponentInChildren<TMP_Text>(true);
-        if (label != null)
-        {
-            label.text = "마법진 추리";
+            string text = label.text.Trim();
+            if (text == "마법진 조사" || text == "마법진 추리")
+            {
+                magicCircleTabButton = button;
+                return;
+            }
         }
-
-        clonedButton.onClick.RemoveAllListeners();
     }
 
     private void HandleInventoryChanged(EvidenceData _) => RefreshIfVisible();
@@ -734,7 +1097,7 @@ public sealed class InvestigationNotebookUI : BasePanelUI
             if (minorPatterns.Count > 0)
             {
                 ClampMagicCircleCursor(minorPatterns.Count);
-                magicCircleInferenceManager.ToggleMinorPattern(minorPatterns[_magicMinorCursorIndex].PartId);
+                magicCircleInferenceManager.SelectMinorPattern(minorPatterns[_magicMinorCursorIndex].PartId);
                 changed = true;
             }
         }

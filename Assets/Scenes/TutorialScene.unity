@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!29 &1
 OcclusionCullingSettings:
@@ -465,14 +465,10 @@ GameObject:
   - component: {fileID: 210002}
   - component: {fileID: 210003}
   - component: {fileID: 210004}
-  - component: {fileID: 210005}
-  - component: {fileID: 210006}
-  - component: {fileID: 210007}
-  - component: {fileID: 210008}
   - component: {fileID: 210010}
   - component: {fileID: 210009}
   m_Layer: 0
-  m_Name: ChapterInvestigationSystems
+  m_Name: ChapterInvestigationManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -485,6 +481,86 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 210000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 220001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &211000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 211001}
+  - component: {fileID: 211002}
+  - component: {fileID: 210006}
+  - component: {fileID: 210007}
+  m_Layer: 0
+  m_Name: ChapterInteractionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &211001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 220001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &211002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c269107ab90e01448375c9bfaf82208, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NpcProfileRegistry
+  profiles: []
+--- !u!1 &212000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 212001}
+  - component: {fileID: 210005}
+  - component: {fileID: 210008}
+  m_Layer: 0
+  m_Name: ChapterAssistantManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &212001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 212000}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -544,7 +620,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 210000}
+  m_GameObject: {fileID: 212000}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71afe42e835e8f544b226ea62ac833fb, type: 3}
@@ -560,7 +636,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 210000}
+  m_GameObject: {fileID: 211000}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed5a23e601c096f40b3385fb50a5316e, type: 3}
@@ -578,7 +654,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 210000}
+  m_GameObject: {fileID: 211000}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 97332829a1237bd4c92d3563ffd95503, type: 3}
@@ -596,7 +672,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 210000}
+  m_GameObject: {fileID: 212000}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04a3497d31430ba4db64314b972e5af8, type: 3}
@@ -626,7 +702,7 @@ MonoBehaviour:
   recipes: []
   selectedMainImageId: 
   selectedSupportImageId: 
-  selectedMinorPatternIds: []
+  selectedMinorPatternId: 
 --- !u!114 &210010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,11 +715,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64b237f3306f83d4ba0e039386ceb4a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerReflectionManager
-  evidenceInventory: {fileID: 0}
-  dialogueLog: {fileID: 0}
-  investigationBoardManager: {fileID: 0}
-  dispositionManager: {fileID: 0}
-  investigationUI: {fileID: 0}
+  evidenceInventory: {fileID: 210002}
+  dialogueLog: {fileID: 210003}
+  investigationBoardManager: {fileID: 210004}
+  dispositionManager: {fileID: 200003}
+  investigationUI: {fileID: 1666654819}
 --- !u!1 &220000
 GameObject:
   m_ObjectHideFlags: 0
@@ -674,6 +750,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 210001}
+  - {fileID: 211001}
+  - {fileID: 212001}
   - {fileID: 230001}
   - {fileID: 230011}
   - {fileID: 230021}
@@ -3038,7 +3116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52d6eec7eab8dac4ab846d47fa7d2498, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDispositionHud
-  dispositionManager: {fileID: 0}
+  dispositionManager: {fileID: 200003}
   labelText: {fileID: 1226786536}
 --- !u!114 &445337464
 MonoBehaviour:
@@ -7392,7 +7470,7 @@ MonoBehaviour:
   hideGameplayHudWhileVisible: 1
   titleText: {fileID: 676188390}
   bodyText: {fileID: 1363308326}
-  dialogueLog: {fileID: 0}
+  dialogueLog: {fileID: 210003}
   playerPortraitSprite: {fileID: 7938742914591930468, guid: 65978581abd8d364aad2e29f14f2ef7a, type: 3}
   assistantPortraitSprite: {fileID: -2026849202068193494, guid: ed99fde87cafa4b4d937546c07c01a8b, type: 3}
   defaultNpcPortraitSprite: {fileID: 0}
@@ -8113,16 +8191,16 @@ MonoBehaviour:
   dialogueLogTabButton: {fileID: 788007494}
   reflectionTabButton: {fileID: 1637141501}
   assistantTabButton: {fileID: 1270130374}
-  magicCircleTabButton: {fileID: 0}
+  magicCircleTabButton: {fileID: 124447282}
   closeButton: {fileID: 54519610}
-  evidenceInventory: {fileID: 0}
-  dialogueLog: {fileID: 0}
-  npcProfileRegistry: {fileID: 0}
-  assistantDiscussionManager: {fileID: 0}
-  playerReflectionManager: {fileID: 0}
-  investigationBoardManager: {fileID: 0}
-  magicCircleInferenceManager: {fileID: 0}
-  dispositionManager: {fileID: 0}
+  evidenceInventory: {fileID: 210002}
+  dialogueLog: {fileID: 210003}
+  npcProfileRegistry: {fileID: 211002}
+  assistantDiscussionManager: {fileID: 210005}
+  playerReflectionManager: {fileID: 210010}
+  investigationBoardManager: {fileID: 210004}
+  magicCircleInferenceManager: {fileID: 210009}
+  dispositionManager: {fileID: 200003}
   toggleWithKeyboard: 1
   legacyToggleKey: 110
   suppressUiNavigationWhileConnectingClues: 1
