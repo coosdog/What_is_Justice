@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed class AssistantCompanionManager : MonoBehaviour
 {
-    [SerializeField] private string assistantName = "\uC950 \uC870\uC218";
+    [SerializeField] private string assistantName = "\uD560\uC544\uBC84\uC9C0 \uC62C\uBE7C\uBBF8";
     [SerializeField] private AssistantDialogueDatabase assistantDialogueDatabase;
     [SerializeField] private CsvDialogueDatabase dialogueDatabase;
     [SerializeField] private InvestigationUI investigationUI;
@@ -120,7 +120,7 @@ public sealed class AssistantCompanionManager : MonoBehaviour
 
         if (lines.Count == 0 && !string.IsNullOrWhiteSpace(fallbackText))
         {
-            lines.Add(new DialogueLine(fallbackSpeaker, fallbackText));
+            lines.Add(new DialogueLine(fallbackSpeaker, fallbackText, "old_owl"));
         }
 
         return lines;

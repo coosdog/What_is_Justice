@@ -1,0 +1,11 @@
+﻿speaker_key,display_name,default_portrait_key,type
+child_owl,손주 올빼미,child_owl,player
+player.child_owl,손주 올빼미,child_owl,player
+player,손주 올빼미,child_owl,player
+old_owl,할아버지 올빼미,old_owl,npc
+npc.old_owl,할아버지 올빼미,old_owl,npc
+grandfather,할아버지 올빼미,old_owl,npc
+system_narration,나레이션,narration,system
+system.narration,나레이션,narration,system
+narration,나레이션,narration,system
+system,시스템,system,system

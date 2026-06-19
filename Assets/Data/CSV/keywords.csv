@@ -1,13 +1,14 @@
-keyword_id,display_name,description
+﻿keyword_id,display_name,description
 keyword.alibi,알리바이,사건 발생 시각에 어디 있었는지에 대한 정보.
 keyword.accident,5년 전 사고,강민혁의 음주운전 의혹과 유치원 버스 사고에 대한 질문.
 keyword.kang_return,복귀 다큐,강민혁의 연예계 복귀와 다큐멘터리 촬영에 대한 질문.
-keyword.victim,피해자 가족,사고로 무너진 사람들과 남겨진 죄책감에 대한 질문.
-keyword.lodge,눈내리는 산장,외부와 단절된 산장과 방 배치에 대한 질문.
+keyword.victim,피해자 가족,사고로 무너진 사람들과 감춰진 죄책감에 대한 질문.
+keyword.lodge,눈내리는 산장,고립된 산장과 방 배치에 대한 질문.
 keyword.medicine,바뀐 약,강민혁이 자기 방에서 몰래 복용한 약과 바꿔치기 가능성.
 keyword.kang_secret,강민혁의 비밀,강민혁이 숨기고 있던 약물 의존과 사적인 습관.
 keyword.weapon,하나의 흉기,현장에 남은 칼과 그것을 둘러싼 조작 흔적.
 keyword.wound,제각각인 자상,하나의 흉기로 보이지만 깊이와 각도가 다른 상처.
 keyword.choi_suspect,최현도 의심,모든 증거가 산장 주인 최현도를 향하는 상황.
-keyword.planted_evidence,인위적인 증거,너무 완벽하게 배치되어 오히려 의심스러운 증거.
+keyword.planted_evidence,인위적인 증거,너무 완벽하게 배치되어 수상한 증거.
 keyword.documentary,촬영 계획,복귀 다큐를 명분으로 산장에 사람들을 모은 계획.
+keyword.alibi,,

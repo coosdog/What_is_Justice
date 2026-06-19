@@ -1,9 +1,10 @@
-npc_id,display_name,no_keyword_dialogue_ids,unknown_keyword_dialogue_ids,no_keyword_fallback_text,unknown_keyword_fallback_text
+﻿npc_id,display_name,no_keyword_dialogue_ids,unknown_keyword_dialogue_ids,no_keyword_fallback_text,unknown_keyword_fallback_text
 npc.witness,목격자,character.witness.no_keyword.001,character.witness.unknown_keyword.001,아직 물어볼 만한 단서가 없다.,그 이야기에 대해서는 아는 것이 없다.
 npc.kang_minhyuk,강민혁,character.kang_minhyuk.no_keyword.001,character.kang_minhyuk.unknown_keyword.001,묻고 싶은 게 있으면 제대로 준비하고 오시죠.,그 이야기는 제게 별 의미 없는 소문입니다.
 npc.han_seongmi,한성미,character.han_seongmi.no_keyword.001,character.han_seongmi.unknown_keyword.001,아직은 제가 드릴 말씀이 없어요.,그 이야기는 잘 모르겠습니다.
 npc.park_sanggu,박상구,character.park_sanggu.no_keyword.001,character.park_sanggu.unknown_keyword.001,물어볼 게 정해지면 말씀하세요.,그건 제가 답할 수 있는 이야기가 아닙니다.
 npc.yoon_taesik,윤태식,character.yoon_taesik.no_keyword.001,character.yoon_taesik.unknown_keyword.001,필요한 질문만 하시오.,그 질문에는 대답할 말이 없소.
-npc.choi_hyeondo,최현도,character.choi_hyeondo.no_keyword.001,character.choi_hyeondo.unknown_keyword.001,산장에 대해 묻고 싶은 게 생기면 말하게.,그건 이 늙은이가 알 바가 아니네.
-npc.seo_jia,서지아,character.seo_jia.no_keyword.001,character.seo_jia.unknown_keyword.001,질문이 정리되면 인터뷰처럼 답해드릴게요.,그 부분은 아직 확인된 내용이 아니에요.
+npc.choi_hyeondo,최현도,character.choi_hyeondo.no_keyword.001,character.choi_hyeondo.unknown_keyword.001,산장에 대해 묻고 싶은 게 생기면 말하게.,그건 나도 잘 아는 바가 아니네.
+npc.seo_jia,서지아,character.seo_jia.no_keyword.001,character.seo_jia.unknown_keyword.001,질문을 정리하면 인터뷰처럼 답해드릴게요.,그 부분은 아직 확인한 내용이 아니에요.
 npc.lee_sujin,이수진,character.lee_sujin.no_keyword.001,character.lee_sujin.unknown_keyword.001,아직 안내해드릴 이야기는 없네요.,그건 제 담당 안내 범위가 아니에요.
+npc.old_owl,할아버지 올빼미,charater.old_owl.no_keyword.001,character.old_owl.unknown_keyword.001,지금은 물어볼 만한 것이 없다.,그 이야기는 네가 직접 확인해 보는게 좋겠구나.

@@ -19,6 +19,23 @@ id,speaker,text,portrait_key,emotion,board_node_id,board_display_name,board_desc
 - `show_portraits`: A/B 캐릭터 이미지 창을 표시할지 정합니다. 비워두면 `true`이며, 나레이션은 `false`로 둡니다.
 - `portrait_layout`: 초상 표시 방식입니다. 비워두면 A/B 양쪽 표시, `single`/`left`/`player_only`는 A칸만 표시합니다.
 
+## 캐릭터 일러스트 표시
+
+대화창의 A/B 이미지 칸은 `portrait_key`로 제어합니다. 씬의 `GlobalGameSystems`에 붙은 `PortraitSpriteRegistry`에서 `portrait_key`와 스프라이트를 연결해두면, CSV에서는 같은 키만 적으면 됩니다.
+
+예시:
+
+```csv
+id,speaker,text,portrait_key,emotion,board_node_id,board_display_name,board_description,show_portraits,portrait_layout
+tutorial.opening.001,손주 올빼미,"나도 언젠가는 그런 탐정이 되고 싶다.",child_owl,hopeful,,,,true,single
+tutorial.grandfather.001,할아버지 올빼미,"답을 맞히는 것보다 중요한 건 이유를 설명하는 눈이다.",old_owl,calm,,,,true,
+system.office.narration.001,나레이션,"문 앞에서 종이가 떨어지는 소리가 났다.",narration,,,,,false,
+```
+
+- 손주 올빼미 독백처럼 A칸만 보여주고 싶으면 `portrait_layout`에 `single`을 넣습니다.
+- 나레이션이나 시스템 문장은 `show_portraits`를 `false`로 둡니다.
+- 새 캐릭터를 추가할 때는 `PortraitSpriteRegistry`에 키와 스프라이트를 추가한 뒤, CSV의 `portrait_key`에 그 키를 사용합니다.
+
 ## ID 작성 형식
 
 ID는 점으로 구분해서 작성합니다.

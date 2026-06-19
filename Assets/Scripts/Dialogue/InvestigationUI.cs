@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// UI component that displays investigation results.
@@ -11,16 +14,18 @@ using UnityEngine.UI;
 public sealed class InvestigationUI : BasePanelUI
 {
     private const string TmpPrewarmText = "\uAC00\uB098\uB2E4\uB77C\uB9C8\uBC14\uC0AC\uC544\uC790\uCC28\uCE74\uD0C0\uD30C\uD558 \uC54C\uB9AC\uBC14\uC774 \uC870\uC0AC \uB300\uD654 \uB3CC\uC544\uAC00\uAE30";
-    private const string PortraitPrewarmText = "AB \uC62C\uBE7C\uBBF8 \uD0D0\uC815 \uC950 \uC870\uC218 \uB300\uD654\uC0C1\uB300";
+    private const string PortraitPrewarmText = "AB \uC190\uC8FC \uC62C\uBE7C\uBBF8 \uD0D0\uC815 \uD560\uC544\uBC84\uC9C0 \uC62C\uBE7C\uBBF8 \uD0D0\uC815 \uB300\uD654\uC0C1\uB300";
 
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text bodyText;
     [SerializeField] private DialogueLog dialogueLog;
+    [SerializeField] private CsvDialogueDatabase dialogueDatabase;
 
     [Header("Dialogue Portraits")]
     [SerializeField] private Sprite playerPortraitSprite;
     [SerializeField] private Sprite assistantPortraitSprite;
     [SerializeField] private Sprite defaultNpcPortraitSprite;
+    [SerializeField] private PortraitSpriteRegistry portraitSpriteRegistry;
     [SerializeField] private PortraitSpriteBinding[] customPortraitSprites = Array.Empty<PortraitSpriteBinding>();
 
     [Header("Temporary Portrait Slots")]
@@ -42,7 +47,7 @@ public sealed class InvestigationUI : BasePanelUI
     private TMP_Text _rightPortraitLabel;
     private TMP_Text _leftPortraitName;
     private TMP_Text _rightPortraitName;
-    private string _leftSpeakerName = "\uC62C\uBE7C\uBBF8 \uD0D0\uC815";
+    private string _leftSpeakerName = "\uC190\uC8FC \uC62C\uBE7C\uBBF8";
     private string _rightSpeakerName = "\uB300\uD654\uC0C1\uB300";
     private string _leftPortraitKey = "player";
     private string _rightPortraitKey = "";
@@ -60,6 +65,16 @@ public sealed class InvestigationUI : BasePanelUI
         if (dialogueLog == null)
         {
             dialogueLog = FindFirstObjectByType<DialogueLog>();
+        }
+
+        if (dialogueDatabase == null)
+        {
+            dialogueDatabase = FindFirstObjectByType<CsvDialogueDatabase>();
+        }
+
+        if (portraitSpriteRegistry == null)
+        {
+            portraitSpriteRegistry = FindFirstObjectByType<PortraitSpriteRegistry>();
         }
 
         ClearTexts();
@@ -124,7 +139,7 @@ public sealed class InvestigationUI : BasePanelUI
 
         if (titleText != null)
         {
-            titleText.text = line.Speaker;
+            titleText.text = ResolveSpeakerDisplayName(line.Speaker);
         }
 
         if (bodyText != null)
@@ -271,7 +286,7 @@ public sealed class InvestigationUI : BasePanelUI
         string subject = string.IsNullOrWhiteSpace(currentLine.Speaker) ? string.Empty : currentLine.Speaker;
         bool leftIsActive = IsPlayerSpeaker(subject);
 
-        string currentPortraitKey = string.IsNullOrWhiteSpace(currentLine.PortraitKey) ? string.Empty : currentLine.PortraitKey;
+        string currentPortraitKey = ResolvePortraitKey(currentLine);
         Sprite leftSprite = leftIsActive && !string.IsNullOrWhiteSpace(currentPortraitKey)
             ? ResolvePortraitSprite(currentPortraitKey, subject)
             : ResolvePortraitSprite(_leftPortraitKey, _leftSpeakerName);
@@ -330,6 +345,16 @@ public sealed class InvestigationUI : BasePanelUI
     {
         if (!string.IsNullOrWhiteSpace(portraitKey))
         {
+            if (portraitSpriteRegistry == null)
+            {
+                portraitSpriteRegistry = FindFirstObjectByType<PortraitSpriteRegistry>();
+            }
+
+            if (portraitSpriteRegistry != null && portraitSpriteRegistry.TryGetSprite(portraitKey, out Sprite registrySprite))
+            {
+                return registrySprite;
+            }
+
             foreach (PortraitSpriteBinding binding in customPortraitSprites ?? Array.Empty<PortraitSpriteBinding>())
             {
                 if (binding != null && binding.Matches(portraitKey) && binding.Sprite != null)
@@ -340,31 +365,95 @@ public sealed class InvestigationUI : BasePanelUI
 
             if (IsPlayerPortraitKey(portraitKey))
             {
-                return playerPortraitSprite;
+                return playerPortraitSprite != null ? playerPortraitSprite : ResolveEditorPortraitFallback(portraitKey);
             }
 
             if (IsAssistantPortraitKey(portraitKey))
             {
-                return assistantPortraitSprite;
+                return assistantPortraitSprite != null ? assistantPortraitSprite : ResolveEditorPortraitFallback(portraitKey);
             }
         }
 
         if (IsPlayerSpeaker(speaker))
         {
-            return playerPortraitSprite;
+            return playerPortraitSprite != null ? playerPortraitSprite : ResolveEditorPortraitFallback("child_owl");
         }
 
         if (IsAssistantSpeaker(speaker))
         {
-            return assistantPortraitSprite;
+            return assistantPortraitSprite != null ? assistantPortraitSprite : ResolveEditorPortraitFallback("old_owl");
         }
 
         return defaultNpcPortraitSprite;
     }
 
+    private string ResolveSpeakerDisplayName(string speakerKey)
+    {
+        if (string.IsNullOrWhiteSpace(speakerKey))
+        {
+            return string.Empty;
+        }
+
+        if (dialogueDatabase == null)
+        {
+            dialogueDatabase = FindFirstObjectByType<CsvDialogueDatabase>();
+        }
+
+        return dialogueDatabase != null ? dialogueDatabase.ResolveSpeakerDisplayName(speakerKey) : speakerKey;
+    }
+
+    private string ResolvePortraitKey(DialogueLine line, string fallbackPortraitKey = "")
+    {
+        if (!string.IsNullOrWhiteSpace(line.PortraitKey))
+        {
+            return line.PortraitKey;
+        }
+
+        if (dialogueDatabase == null)
+        {
+            dialogueDatabase = FindFirstObjectByType<CsvDialogueDatabase>();
+        }
+
+        string defaultPortraitKey = dialogueDatabase != null
+            ? dialogueDatabase.ResolveDefaultPortraitKey(line.Speaker)
+            : string.Empty;
+
+        return string.IsNullOrWhiteSpace(defaultPortraitKey) ? fallbackPortraitKey : defaultPortraitKey;
+    }
+
+    private static Sprite ResolveEditorPortraitFallback(string portraitKey)
+    {
+#if UNITY_EDITOR
+        string path = string.Empty;
+        if (IsPlayerPortraitKey(portraitKey))
+        {
+            path = "Assets/Sprites/Child_Owl.png";
+        }
+        else if (IsAssistantPortraitKey(portraitKey))
+        {
+            path = "Assets/Sprites/Old_Owl.png";
+        }
+
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(path))
+            {
+                if (asset is Sprite sprite)
+                {
+                    return sprite;
+                }
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+#endif
+
+        return null;
+    }
+
     private void ResolvePortraitSpeakerNames()
     {
-        _leftSpeakerName = "\uC62C\uBE7C\uBBF8 \uD0D0\uC815";
+        _leftSpeakerName = "\uC190\uC8FC \uC62C\uBE7C\uBBF8";
         _rightSpeakerName = "\uB300\uD654\uC0C1\uB300";
         _leftPortraitKey = "player";
         _rightPortraitKey = "";
@@ -385,7 +474,7 @@ public sealed class InvestigationUI : BasePanelUI
             if (IsPlayerSpeaker(speaker))
             {
                 _leftSpeakerName = NormalizePlayerSpeakerName(speaker);
-                _leftPortraitKey = string.IsNullOrWhiteSpace(line.PortraitKey) ? "player" : line.PortraitKey;
+                _leftPortraitKey = ResolvePortraitKey(line, "player");
                 break;
             }
         }
@@ -400,8 +489,8 @@ public sealed class InvestigationUI : BasePanelUI
             string speaker = line.Speaker;
             if (!string.IsNullOrWhiteSpace(speaker) && !IsPlayerSpeaker(speaker))
             {
-                _rightSpeakerName = speaker;
-                _rightPortraitKey = line.PortraitKey;
+                _rightSpeakerName = ResolveSpeakerDisplayName(speaker);
+                _rightPortraitKey = ResolvePortraitKey(line);
                 break;
             }
         }
@@ -410,6 +499,9 @@ public sealed class InvestigationUI : BasePanelUI
     private static bool IsPlayerPortraitKey(string portraitKey)
     {
         return string.Equals(portraitKey, "player", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "child", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "child_owl", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "rookie_owl", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(portraitKey, "owl", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(portraitKey, "owl_detective", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(portraitKey, "private_investigator", StringComparison.OrdinalIgnoreCase);
@@ -418,6 +510,9 @@ public sealed class InvestigationUI : BasePanelUI
     private static bool IsAssistantPortraitKey(string portraitKey)
     {
         return string.Equals(portraitKey, "assistant", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "old_owl", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "grandfather", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(portraitKey, "mentor", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(portraitKey, "rat", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(portraitKey, "rat_assistant", StringComparison.OrdinalIgnoreCase);
     }
@@ -429,10 +524,37 @@ public sealed class InvestigationUI : BasePanelUI
             return false;
         }
 
+        if (speaker.Equals("child_owl", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("player", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("player.child_owl", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("rookie_owl", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (speaker.Equals("old_owl", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("grandfather", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("npc.old_owl", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("system", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("system_narration", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("system.narration", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("narration", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (speaker.Contains("\uD560\uC544\uBC84\uC9C0") ||
+            speaker.Contains("\uC6D0\uB85C") ||
+            speaker.Contains("\uC2A4\uC2B9"))
+        {
+            return false;
+        }
+
         return speaker.Contains("\uB098") ||
                speaker.Contains("\uD50C\uB808\uC774\uC5B4") ||
-               speaker.Contains("\uD0D0\uC815") ||
-               speaker.Contains("\uC62C\uBE7C\uBBF8");
+               speaker.Contains("\uC62C\uBE7C\uBBF8 \uD0D0\uC815") ||
+               speaker.Contains("\uC190\uC8FC") ||
+               speaker.Contains("\uCD08\uC9DC");
     }
 
     private static bool IsAssistantSpeaker(string speaker)
@@ -442,13 +564,35 @@ public sealed class InvestigationUI : BasePanelUI
             return false;
         }
 
+        if (speaker.Equals("old_owl", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("grandfather", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("npc.old_owl", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
         return speaker.Contains("\uC870\uC218") ||
-               speaker.Contains("\uC950");
+               speaker.Contains("\uC950") ||
+               speaker.Contains("\uD560\uC544\uBC84\uC9C0") ||
+               speaker.Contains("\uC6D0\uB85C") ||
+               speaker.Contains("\uC2A4\uC2B9");
     }
 
     private static string NormalizePlayerSpeakerName(string speaker)
     {
-        return string.IsNullOrWhiteSpace(speaker) || speaker == "\uB098" ? "\uC62C\uBE7C\uBBF8 \uD0D0\uC815" : speaker;
+        if (string.IsNullOrWhiteSpace(speaker) || speaker == "\uB098")
+        {
+            return "\uC190\uC8FC \uC62C\uBE7C\uBBF8";
+        }
+
+        if (speaker.Equals("child_owl", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("player", StringComparison.OrdinalIgnoreCase) ||
+            speaker.Equals("player.child_owl", StringComparison.OrdinalIgnoreCase))
+        {
+            return "\uC190\uC8FC \uC62C\uBE7C\uBBF8";
+        }
+
+        return speaker;
     }
 
     private void SetPortraitFocus(bool leftIsActive)

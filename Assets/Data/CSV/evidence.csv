@@ -1,10 +1,11 @@
-evidence_id,display_name,description,unlocked_keyword_ids
-evidence.alibi_note,수상한 사건 메모,"산장 사건 시간대와 각 인물의 위치가 대략 적혀 있다.",keyword.alibi|keyword.lodge
-evidence.kang_private_medicine,강민혁의 약통,"강민혁의 방에서 발견된 개인 약통. 라벨과 안의 알약이 미묘하게 맞지 않는다.",keyword.medicine|keyword.kang_secret
-evidence.single_knife,하나의 흉기,"최현도의 창고 물건처럼 보이는 칼. 하지만 상처의 깊이와 방향은 일정하지 않다.",keyword.weapon|keyword.wound
+﻿evidence_id,display_name,description,unlocked_keyword_ids
+evidence.alibi_note,수상한 사건 메모,현장 사건 시간대와 각 인물의 위치가 적힌 종이가 있다.,keyword.alibi|keyword.lodge
+evidence.kang_private_medicine,강민혁의 약통,강민혁의 방에서 발견된 개인 약통. 원래의 약과 새 약의 표기가 미묘하게 맞지 않는다.,keyword.medicine|keyword.kang_secret
+evidence.single_knife,하나의 흉기,최현도의 창고 물건처럼 보이는 칼. 하지만 상처의 깊이와 방향은 일정하지 않다.,keyword.weapon|keyword.wound
 evidence.choi_planted_clues,최현도에게 향하는 증거,"마스터키, 장갑, 창고 기록이 지나치게 깔끔하게 최현도를 가리킨다.",keyword.choi_suspect|keyword.planted_evidence
-evidence.seo_production_note,촬영 준비 메모,"서지아의 촬영 자료. 강민혁의 컨디션과 사적인 습관을 파악한 흔적이 있다.",keyword.documentary|keyword.medicine
-evidence.yoon_tool_trace,손질된 목공 칼 흔적,"칼날의 손질 방식과 약품 냄새가 윤태식의 작업 도구와 맞물린다.",keyword.weapon|keyword.medicine
-evidence.han_sleeping_pills,한성미의 수면제,"한성미가 잠을 이루지 못해 복용하던 약. 사건의 약물 단서와 닮아 있다.",keyword.medicine|keyword.victim
-evidence.park_door_mark,문가의 긁힌 자국,"강민혁의 방문 근처에 남은 깊은 긁힘. 공구 흔적이라기엔 방향이 어색하다.",keyword.wound|keyword.alibi
-evidence.lee_room_assignment,방 배정표,"이수진이 정리한 방 배정표. 주인공 일행은 강민혁 방에서 먼 곳에 배정되어 있다.",keyword.lodge|keyword.alibi
+evidence.seo_production_note,촬영 준비 메모,서지아의 촬영 자료. 강민혁의 컨디션과 사적인 습관을 파악한 흔적이 있다.,keyword.documentary|keyword.medicine
+evidence.yoon_tool_trace,윤태식 목공 칼 흔적,칼날의 마모 방식과 손잡이의 먼지가 윤태식의 작업 도구와 맞물린다.,keyword.weapon|keyword.medicine
+evidence.han_sleeping_pills,한성미의 수면제,한성미가 잠을 이루지 못해 복용하던 약. 사건의 약물 단서와 닮아 있다.,keyword.medicine|keyword.victim
+evidence.park_door_mark,문가의 긁힌 자국,강민혁의 방문 근처에 남은 깊은 긁힌 자국. 공구 흔적이라기엔 방향이 이상하다.,keyword.wound|keyword.alibi
+evidence.lee_room_assignment,방 배정표,이수진이 정리한 방 배정표. 주인공 일행은 강민혁의 방에서 먼 곳에 배정되어 있다.,keyword.lodge|keyword.alibi
+evidence.alibi_note,,,

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public sealed class AssistantDiscussionManager : MonoBehaviour
 {
-    [SerializeField] private string assistantName = "\uC950 \uC870\uC218";
+    [SerializeField] private string assistantName = "\uD560\uC544\uBC84\uC9C0 \uC62C\uBE7C\uBBF8";
     [SerializeField] private EvidenceInventory evidenceInventory;
     [SerializeField] private InvestigationUI investigationUI;
     [SerializeField] private PlayerDispositionManager dispositionManager;
@@ -32,8 +32,8 @@ public sealed class AssistantDiscussionManager : MonoBehaviour
 
         List<DialogueLine> lines = new()
         {
-            new DialogueLine(assistantName, BuildAssistantSummary(), "assistant"),
-            new DialogueLine("\uB098", BuildPlayerResponse(), "player")
+            new DialogueLine(assistantName, BuildAssistantSummary(), "old_owl"),
+            new DialogueLine("\uB098", BuildPlayerResponse(), "child_owl")
         };
 
         investigationUI?.ShowSequence(lines);
@@ -60,21 +60,21 @@ public sealed class AssistantDiscussionManager : MonoBehaviour
 
         if (evidenceCount == 0 && keywordCount == 0)
         {
-            return "\uC544\uC9C1\uC740 \uAC19\uC774 \uB9DE\uCDB0\uBCFC \uC790\uB8CC\uAC00 \uBD80\uC871\uD574 \uBCF4\uC5EC\uC694. \uBA3C\uC800 \uB208\uC5D0 \uB744\uB294 \uC7A5\uC18C\uB97C \uC870\uC0AC\uD574\uBCF4\uC8E0.";
+            return "\uC544\uC9C1 \uD310\uB2E8\uD560 \uC790\uB8CC\uAC00 \uBD80\uC871\uD558\uAD6C\uB098. \uBA3C\uC800 \uB208\uC5D0 \uB744\uB294 \uC7A5\uC18C\uB97C \uC870\uC0AC\uD574\uBCF4\uAC70\uB77C.";
         }
 
         StringBuilder builder = new();
-        builder.AppendLine($"\uC9C0\uAE08\uAE4C\uC9C0 \uBAA8\uC740 \uB2E8\uC11C\uB294 {evidenceCount}\uAC1C, \uC9C8\uBB38\uD560 \uD0A4\uC6CC\uB4DC\uB294 {keywordCount}\uAC1C\uC608\uC694.");
+        builder.AppendLine($"\uC9C0\uAE08\uAE4C\uC9C0 \uBAA8\uC740 \uB2E8\uC11C\uB294 {evidenceCount}\uAC1C, \uC9C8\uBB38\uD560 \uD0A4\uC6CC\uB4DC\uB294 {keywordCount}\uAC1C\uB85C\uAD6C\uB098.");
         builder.AppendLine();
 
         int hintCount = AppendCurrentHints(builder);
         if (hintCount == 0)
         {
-            builder.AppendLine("\uC544\uC9C1\uC740 \uC904\uAE30\uAC00 \uC798 \uC548 \uBCF4\uC5EC\uC694. \uB2E8\uC11C\uAC00 \uC5F4\uB9B0 \uC778\uBB3C\uC5D0\uAC8C \uB2E4\uC2DC \uB9D0\uC744 \uAC78\uC5B4\uBCF4\uBA74 \uC791\uC740 \uBC18\uC751\uC774 \uB098\uC62C\uC9C0\uB3C4 \uBAB0\uB77C\uC694.");
+            builder.AppendLine("\uC544\uC9C1\uC740 \uC904\uAE30\uAC00 \uC798 \uBCF4\uC774\uC9C0 \uC54A\uB294\uAD6C\uB098. \uB2E8\uC11C\uAC00 \uAC00\uB9AC\uD0A4\uB294 \uACF3\uC744 \uCC9C\uCC9C\uD788 \uB2E4\uC2DC \uC0B4\uD3B4\uBCF4\uAC70\uB77C.");
         }
 
         builder.AppendLine();
-        builder.AppendLine("\uC81C\uAC00 \uB2E4 \uCC3E\uC544\uB4DC\uB9AC\uC9C4 \uC54A\uC744\uAC8C\uC694. \uADF8\uB798\uB3C4 \uB9D0\uC774 \uBD88\uD3B8\uD574\uC9C0\uB294 \uC0AC\uB78C\uC740 \uAF2D \uB2E4\uC2DC \uBCF4\uC2DC\uC8E0.");
+        builder.AppendLine("\uB0B4\uAC00 \uB2F5\uC744 \uB300\uC2E0 \uB9D0\uD574\uC8FC\uC9C4 \uC54A\uC73C\uB9C8. \uB2E4\uB9CC \uB108\uC758 \uB208\uC774 \uBA38\uBB34\uB294 \uACF3\uC774 \uC5B4\uB514\uC778\uC9C0\uB294 \uD568\uAED8 \uC9DA\uC5B4\uBCF4\uC790\uAD6C\uB098.");
         return builder.ToString();
     }
 

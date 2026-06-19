@@ -1,7 +1,7 @@
-npc_id,keyword_id,disposition,response_dialogue_ids,fallback_response_text
+﻿npc_id,keyword_id,disposition,response_dialogue_ids,fallback_response_text
 npc.witness,keyword.alibi,basic,character.witness.alibi.001|character.witness.alibi.002,그 시간에는 법원 복도에 있었습니다.
-npc.witness,keyword.alibi,Tendency2,,미세한 청각으로 들으면 목격자는 장소보다 시간을 말할 때 호흡이 조금 흔들립니다.
-npc.witness,keyword.alibi,Tendency3,,침묵의 응시로 압박하자 목격자가 계단 쪽 소리를 들었다는 말을 늦게 덧붙입니다.
+npc.witness,keyword.alibi,Tendency2,,미세한 청각으로 들으면 목격자는 평소보다 시간을 말할 때 말끝이 조금 흔들립니다.
+npc.witness,keyword.alibi,Tendency3,,침묵의 응시로 압박하자 목격자가 계단 쪽 소리를 들었다는 말을 어렵게 꺼냅니다.
 npc.kang_minhyuk,keyword.accident,basic,character.kang_minhyuk.accident.001,
 npc.kang_minhyuk,keyword.kang_return,basic,character.kang_minhyuk.return.001,
 npc.kang_minhyuk,keyword.kang_secret,basic,character.kang_minhyuk.secret.001,
@@ -9,36 +9,36 @@ npc.han_seongmi,keyword.accident,basic,character.han_seongmi.accident.001,
 npc.han_seongmi,keyword.alibi,basic,character.han_seongmi.alibi.001,
 npc.han_seongmi,keyword.victim,basic,character.han_seongmi.victim.001,
 npc.han_seongmi,keyword.medicine,basic,character.han_seongmi.medicine.001,
-npc.han_seongmi,keyword.medicine,Tendency2,,한성미는 약 이야기가 나오자 숨을 짧게 삼킨다. 잠을 못 잔다는 말은 사실이지만 전부는 아니다.
-npc.han_seongmi,keyword.wound,Tendency3,,한성미는 시선을 피한다. 깊게 찌르지 못한 상처 하나가 누구의 것인지 알고 있는 듯하다.
+npc.han_seongmi,keyword.medicine,Tendency2,,한성미는 약 이야기가 나오자 숨을 짧게 삼킵니다. 잠을 못 이룬다는 말은 사실이지만 전부는 아닙니다.
+npc.han_seongmi,keyword.wound,Tendency3,,한성미는 시선을 피합니다. 깊게 찌르지 못한 상처 하나가 누구의 것인지 알고 있는 듯합니다.
 npc.park_sanggu,keyword.accident,basic,character.park_sanggu.accident.001,
 npc.park_sanggu,keyword.alibi,basic,character.park_sanggu.alibi.001,
 npc.park_sanggu,keyword.victim,basic,character.park_sanggu.victim.001,
 npc.park_sanggu,keyword.wound,basic,character.park_sanggu.wound.001,
-npc.park_sanggu,keyword.wound,Tendency2,,박상구의 목소리가 낮게 갈라진다. 문 앞에 가지 않았다는 말은 스스로도 믿지 못하는 듯하다.
-npc.park_sanggu,keyword.choi_suspect,Tendency3,,침묵이 길어지자 박상구는 최현도를 탓하는 말보다 먼저 '그분은 너무 늙었다'고 중얼거린다.
+npc.park_sanggu,keyword.wound,Tendency2,,박상구의 목소리가 작게 갈라집니다. 문 앞에 가지 않았다는 말은 스스로도 믿지 못하는 듯합니다.
+npc.park_sanggu,keyword.choi_suspect,Tendency3,,침묵이 길어지자 박상구는 최현도를 탓하기보다 먼저 '그분은 너무 늙었어'라고 중얼거립니다.
 npc.yoon_taesik,keyword.accident,basic,character.yoon_taesik.accident.001,
 npc.yoon_taesik,keyword.alibi,basic,character.yoon_taesik.alibi.001,
 npc.yoon_taesik,keyword.victim,basic,character.yoon_taesik.victim.001,
 npc.yoon_taesik,keyword.medicine,basic,character.yoon_taesik.medicine.001,
 npc.yoon_taesik,keyword.weapon,basic,character.yoon_taesik.weapon.001,
-npc.yoon_taesik,keyword.wound,Tendency2,,윤태식은 상처 이야기에 너무 빠르게 반응한다. 모르는 사람이 낼 수 없는 의학적 확신이다.
+npc.yoon_taesik,keyword.wound,Tendency2,,윤태식은 상처 이야기에 너무 빠르게 반응합니다. 모르는 사람에게서는 나올 수 없는 의학적 확신입니다.
 npc.choi_hyeondo,keyword.accident,basic,character.choi_hyeondo.accident.001,
 npc.choi_hyeondo,keyword.alibi,basic,character.choi_hyeondo.alibi.001,
 npc.choi_hyeondo,keyword.lodge,basic,character.choi_hyeondo.lodge.001,
 npc.choi_hyeondo,keyword.choi_suspect,basic,character.choi_hyeondo.suspect.001,
 npc.choi_hyeondo,keyword.planted_evidence,basic,character.choi_hyeondo.planted.001,
-npc.choi_hyeondo,keyword.planted_evidence,Tendency3,,최현도는 압박에도 흔들리지 않는다. 오히려 네가 그를 범인으로 확신하길 기다리는 사람처럼 보인다.
+npc.choi_hyeondo,keyword.planted_evidence,Tendency3,,최현도는 압박에도 흔들리지 않습니다. 오히려 누군가 그를 범인으로 확신하길 기다리는 사람처럼 보입니다.
 npc.seo_jia,keyword.accident,basic,character.seo_jia.accident.001,
 npc.seo_jia,keyword.alibi,basic,character.seo_jia.alibi.001,
 npc.seo_jia,keyword.kang_return,basic,character.seo_jia.return.001,
 npc.seo_jia,keyword.documentary,basic,character.seo_jia.documentary.001,
 npc.seo_jia,keyword.medicine,basic,character.seo_jia.medicine.001,
-npc.seo_jia,keyword.medicine,Tendency2,,서지아의 대답은 매끄럽지만 약통이라는 단어에서 아주 짧게 호흡이 빈다.
-npc.seo_jia,keyword.planted_evidence,Tendency3,,서지아는 침묵을 연출처럼 받아낸다. 하지만 최현도에게 향한 증거를 부정하지는 않는다.
+npc.seo_jia,keyword.medicine,Tendency2,,서지아의 대답은 매끄럽지만 약통이라는 단어에서 아주 짧게 말끝이 빕니다.
+npc.seo_jia,keyword.planted_evidence,Tendency3,,서지아는 침묵을 연출처럼 받아냅니다. 하지만 최현도에게 향한 증거를 부정하지는 않습니다.
 npc.lee_sujin,keyword.accident,basic,character.lee_sujin.accident.001,
 npc.lee_sujin,keyword.alibi,basic,character.lee_sujin.alibi.001,
 npc.lee_sujin,keyword.kang_return,basic,character.lee_sujin.return.001,
 npc.lee_sujin,keyword.lodge,basic,character.lee_sujin.lodge.001,
-npc.lee_sujin,keyword.alibi,Tendency2,,이수진은 모두가 잤다고 말하지만, 방 배정 이야기에선 박자가 반 박자 늦다.
-npc.lee_sujin,keyword.planted_evidence,Tendency3,,이수진은 웃음을 유지한다. 하지만 '누가 발견하게 만들었나'라는 질문에는 답하지 않는다.
+npc.lee_sujin,keyword.alibi,Tendency2,,이수진은 모두가 잤다고 말하지만 방 배정 이야기에서 박자가 반 박자 늦습니다.
+npc.lee_sujin,keyword.planted_evidence,Tendency3,,이수진은 웃음을 유지합니다. 하지만 '누가 발견하게 만들었나'라는 질문에는 답하지 않습니다.

@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueCsvCollection
   csvFiles:
   - {fileID: 4900000, guid: b920964bce0cff04eaa6e273dd9fdc33, type: 3}
+  - {fileID: 4900000, guid: 3e2f6b6c9e5147ec9a5f1a2d20b3d401, type: 3}

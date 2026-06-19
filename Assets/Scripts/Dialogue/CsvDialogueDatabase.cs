@@ -9,6 +9,7 @@ public sealed class CsvDialogueDatabase : MonoBehaviour
     [SerializeField] private DialogueCsvCollection csvCollection;
 
     private readonly Dictionary<string, DialogueEntry> _entriesById = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, SpeakerProfile> _speakerProfilesByKey = new(StringComparer.OrdinalIgnoreCase);
 
     private void Awake()
     {
@@ -26,9 +27,27 @@ public sealed class CsvDialogueDatabase : MonoBehaviour
         return TryGetEntry(id, out DialogueEntry entry) ? entry.Text : fallback;
     }
 
+    public bool TryGetSpeakerProfile(string speakerKey, out SpeakerProfile profile)
+    {
+        profile = null;
+        return !string.IsNullOrWhiteSpace(speakerKey) && _speakerProfilesByKey.TryGetValue(speakerKey.Trim(), out profile);
+    }
+
+    public string ResolveSpeakerDisplayName(string speakerKey)
+    {
+        return TryGetSpeakerProfile(speakerKey, out SpeakerProfile profile) ? profile.DisplayName : speakerKey;
+    }
+
+    public string ResolveDefaultPortraitKey(string speakerKey)
+    {
+        return TryGetSpeakerProfile(speakerKey, out SpeakerProfile profile) ? profile.DefaultPortraitKey : string.Empty;
+    }
+
     public void LoadAll()
     {
         _entriesById.Clear();
+        _speakerProfilesByKey.Clear();
+        LoadBuiltInSpeakerProfiles();
 
         if (csvCollection == null)
         {
@@ -69,15 +88,23 @@ public sealed class CsvDialogueDatabase : MonoBehaviour
         for (int i = 1; i < rows.Count; i++)
         {
             List<string> row = rows[i];
+            LoadSpeakerProfileRow(row, headers);
+
             string id = GetCell(row, headers, "id");
             if (string.IsNullOrWhiteSpace(id))
             {
                 continue;
             }
 
+            string speakerKey = GetCell(row, headers, "speaker_key");
+            if (string.IsNullOrWhiteSpace(speakerKey))
+            {
+                speakerKey = GetCell(row, headers, "speaker");
+            }
+
             DialogueEntry entry = new DialogueEntry(
                 id.Trim(),
-                GetCell(row, headers, "speaker"),
+                speakerKey,
                 GetCell(row, headers, "text"),
                 GetCell(row, headers, "portrait_key"),
                 GetCell(row, headers, "emotion"),
@@ -94,6 +121,46 @@ public sealed class CsvDialogueDatabase : MonoBehaviour
 
             _entriesById[entry.Id] = entry;
         }
+    }
+
+    private void LoadBuiltInSpeakerProfiles()
+    {
+        AddSpeakerProfile(new SpeakerProfile("child_owl", "손주 올빼미", "child_owl", "player"));
+        AddSpeakerProfile(new SpeakerProfile("player.child_owl", "손주 올빼미", "child_owl", "player"));
+        AddSpeakerProfile(new SpeakerProfile("player", "손주 올빼미", "child_owl", "player"));
+        AddSpeakerProfile(new SpeakerProfile("old_owl", "할아버지 올빼미", "old_owl", "npc"));
+        AddSpeakerProfile(new SpeakerProfile("npc.old_owl", "할아버지 올빼미", "old_owl", "npc"));
+        AddSpeakerProfile(new SpeakerProfile("grandfather", "할아버지 올빼미", "old_owl", "npc"));
+        AddSpeakerProfile(new SpeakerProfile("system_narration", "나레이션", "narration", "system"));
+        AddSpeakerProfile(new SpeakerProfile("system.narration", "나레이션", "narration", "system"));
+        AddSpeakerProfile(new SpeakerProfile("narration", "나레이션", "narration", "system"));
+        AddSpeakerProfile(new SpeakerProfile("system", "시스템", "system", "system"));
+    }
+
+    private void LoadSpeakerProfileRow(List<string> row, Dictionary<string, int> headers)
+    {
+        string speakerKey = GetCell(row, headers, "speaker_key");
+        string displayName = GetCell(row, headers, "display_name");
+        if (string.IsNullOrWhiteSpace(speakerKey) || string.IsNullOrWhiteSpace(displayName))
+        {
+            return;
+        }
+
+        AddSpeakerProfile(new SpeakerProfile(
+            speakerKey,
+            displayName,
+            GetCell(row, headers, "default_portrait_key"),
+            GetCell(row, headers, "type")));
+    }
+
+    private void AddSpeakerProfile(SpeakerProfile profile)
+    {
+        if (profile == null || string.IsNullOrWhiteSpace(profile.SpeakerKey))
+        {
+            return;
+        }
+
+        _speakerProfilesByKey[profile.SpeakerKey] = profile;
     }
 
     private static Dictionary<string, int> BuildHeaderMap(List<string> headerRow)

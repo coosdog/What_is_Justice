@@ -1,0 +1,4 @@
+rule_id,npc_id,action,priority,condition_type,condition_value,result_type,result_value,run_once
+old_owl.no_letter,npc.old_owl,talk,100,missing_item,tutorial.letter,dialogue,character.old_owl.no_letter.001,FALSE
+old_owl.deliver_letter,npc.old_owl,talk,90,has_item,tutorial.letter,event,tutorial.deliver_letter_to_grandfather,TRUE
+old_owl.default,npc.old_owl,talk,0,always,,dialogue,character.old_owl.default.001,FALSE
